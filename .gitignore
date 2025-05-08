@@ -1,11 +1,9 @@
 # outs
-
 sim
 
 # object files
-
+obj/
 *.o
 
 # macOS
-
 .DS_Store

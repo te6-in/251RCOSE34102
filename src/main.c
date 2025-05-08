@@ -1,104 +1,15 @@
+#include "process.h"
+#include "queue.h"
+#include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
-
-typedef struct {
-  int pid;
-  // int priority;
-  int arrival;
-  int cpu_burst;
-  // int io_burst;
-  // int io_request;
-
-  int remaining_cpu_burst;
-} Process;
-
-typedef struct ProcessNode {
-  Process p;
-  struct ProcessNode *next;
-} ProcessNode;
-
-static ProcessNode *head = NULL;
-static ProcessNode *tail = NULL;
-
-static void enqueue(Process p) {
-  ProcessNode *node = (ProcessNode *)malloc(sizeof(ProcessNode));
-
-  if (!node) {
-    perror("malloc");
-    exit(EXIT_FAILURE);
-  }
-
-  node->p = p;
-  node->next = NULL;
-
-  if (!tail) {
-    head = tail = node;
-
-    return;
-  }
-
-  tail->next = node;
-  tail = node;
-}
-
-static int dequeue(Process *out) {
-  if (!head) // queue is empty
-    return 0;
-
-  ProcessNode *tmp = head;
-  *out = head->p;
-  head = head->next;
-
-  if (!head)
-    tail = NULL; // queue is now empty
-
-  free(tmp);
-
-  return 1; // success
-}
-
-static int is_queue_empty(void) { return head == NULL; }
 
 static void print_state(Process *running) {
   if (running->remaining_cpu_burst > 0) {
     printf("    [실행 중] P%d (%d 남음)\n", running->pid, running->remaining_cpu_burst);
   }
 
-  printf("    [대기 큐]\n");
-
-  if (!head) {
-    printf("    (비어 있음)\n");
-
-    return;
-  }
-
-  ProcessNode *cur = head;
-
-  while (cur) {
-    printf("    P%d (%d 남음) ", cur->p.pid, cur->p.remaining_cpu_burst);
-    cur = cur->next;
-  }
-
-  printf("\n");
-}
-
-static int get_positive_int(const char *prompt) {
-  char buffer[16];
-  int value;
-
-  while (1) {
-    printf("%s", prompt);
-
-    if (!fgets(buffer, sizeof(buffer), stdin)) {
-      perror("fgets");
-      exit(EXIT_FAILURE);
-    }
-
-    if (sscanf(buffer, "%d", &value) == 1 && value > 0)
-      return value;
-
-    puts("양의 정수를 입력해 주세요.");
-  }
+  print_queue();
 }
 
 static void end_simulator(int current_time) {
@@ -129,14 +40,13 @@ int main(void) {
       if (choice == 'y' || choice == 'Y' || choice == 'n' || choice == 'N' || choice == 'q' ||
           choice == 'Q' || choice == 'p' || choice == 'P')
         break;
-
-      puts("    y, n, p, q 중 하나를 입력해 주세요.");
     }
 
     switch (choice) {
     case 'q':
     case 'Q':
       end_simulator(current_time);
+      break;
 
     case 'p':
     case 'P':
