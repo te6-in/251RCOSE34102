@@ -61,8 +61,7 @@ static int is_queue_empty(void) { return head == NULL; }
 
 static void print_state(Process *running) {
   if (running->remaining_cpu_burst > 0) {
-    printf("    [실행 중] P%d (%d 남음)\n", running->pid,
-           running->remaining_cpu_burst);
+    printf("    [실행 중] P%d (%d 남음)\n", running->pid, running->remaining_cpu_burst);
   }
 
   printf("    [대기 큐]\n");
@@ -127,8 +126,8 @@ int main(void) {
 
       choice = input[0];
 
-      if (choice == 'y' || choice == 'Y' || choice == 'n' || choice == 'N' ||
-          choice == 'q' || choice == 'Q' || choice == 'p' || choice == 'P')
+      if (choice == 'y' || choice == 'Y' || choice == 'n' || choice == 'N' || choice == 'q' ||
+          choice == 'Q' || choice == 'p' || choice == 'P')
         break;
 
       puts("    y, n, p, q 중 하나를 입력해 주세요.");
@@ -170,18 +169,18 @@ int main(void) {
     // 실행할 프로세스 있음
 
     if (running.remaining_cpu_burst == running.cpu_burst) {
-      printf("Time %d   — 프로세스 %d 실행 시작 (burst %d 예정)\n",
-             current_time, running.pid, running.remaining_cpu_burst);
+      printf("Time %d   — 프로세스 %d 실행 시작 (burst %d 예정)\n", current_time, running.pid,
+             running.remaining_cpu_burst);
     }
 
     running.remaining_cpu_burst--;
 
-    printf("Time %d~%d — 프로세스 %d 실행  (burst %d 남음)\n", current_time,
-           current_time + 1, running.pid, running.remaining_cpu_burst);
+    printf("Time %d~%d — 프로세스 %d 실행  (burst %d 남음)\n", current_time, current_time + 1,
+           running.pid, running.remaining_cpu_burst);
 
     if (running.remaining_cpu_burst == 0) {
-      printf("Time   %d — 프로세스 %d 종료 (burst %d 완료)\n", current_time + 1,
-             running.pid, running.cpu_burst);
+      printf("Time   %d — 프로세스 %d 종료 (burst %d 완료)\n", current_time + 1, running.pid,
+             running.cpu_burst);
     }
 
     current_time++;
