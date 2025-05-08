@@ -3,12 +3,15 @@ CFLAGS = -Wall -Wextra -Iinclude
 
 SRC_DIR = src
 OBJ_DIR = obj
-BIN = sim
+BIN_DIR = bin
+
+BIN_NAME = sim
 
 SRCS = $(wildcard $(SRC_DIR)/*.c)
 OBJS = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 
-$(BIN): $(OBJS)
+$(BIN_DIR)/$(BIN_NAME): $(OBJS)
+	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ $^
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
@@ -16,6 +19,6 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(OBJ_DIR) $(BIN)
+	rm -rf $(OBJ_DIR) $(BIN_DIR)
 
 .PHONY: clean
