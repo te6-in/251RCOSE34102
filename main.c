@@ -59,6 +59,30 @@ static int dequeue(Process *out) {
 
 static int is_queue_empty(void) { return head == NULL; }
 
+static void print_state(Process *running) {
+  if (running->remaining_cpu_burst > 0) {
+    printf("    [실행 중] P%d (%d 남음)\n", running->pid,
+           running->remaining_cpu_burst);
+  }
+
+  printf("    [대기 큐]\n");
+
+  if (!head) {
+    printf("    (비어 있음)\n");
+
+    return;
+  }
+
+  ProcessNode *cur = head;
+
+  while (cur) {
+    printf("    P%d (%d 남음) ", cur->p.pid, cur->p.remaining_cpu_burst);
+    cur = cur->next;
+  }
+
+  printf("\n");
+}
+
 static int get_positive_int(const char *prompt) {
   char buffer[16];
   int value;
@@ -96,7 +120,7 @@ int main(void) {
     char choice;
 
     while (1) {
-      printf("\nTime %d   — 프로세스를 추가할까요? (y/n/q): ", current_time);
+      printf("\nTime %d   — 프로세스를 추가할까요? (y/n/p/q): ", current_time);
 
       if (!fgets(input, sizeof(input), stdin)) // EOF
         end_simulator(current_time);
@@ -104,22 +128,30 @@ int main(void) {
       choice = input[0];
 
       if (choice == 'y' || choice == 'Y' || choice == 'n' || choice == 'N' ||
-          choice == 'q' || choice == 'Q')
+          choice == 'q' || choice == 'Q' || choice == 'p' || choice == 'P')
         break;
 
-      puts("    y, n, q 중 하나를 입력해 주세요.");
+      puts("    y, n, p, q 중 하나를 입력해 주세요.");
     }
 
-    if (choice == 'q' || choice == 'Q')
+    switch (choice) {
+    case 'q':
+    case 'Q':
       end_simulator(current_time);
 
-    if (choice == 'y' || choice == 'Y') {
+    case 'p':
+    case 'P':
+      print_state(&running);
+      continue;
+
+    case 'y':
+    case 'Y':
       int burst = get_positive_int("    CPU burst: ");
 
       Process p = {pid_counter++, current_time, burst, burst};
       enqueue(p);
 
-      printf("    ⇒ 프로세스 %d 추가됨 (burst %d)\n", p.pid, burst);
+      print_state(&running);
     }
 
     // 현재 실행 중인 프로세스가 없음
