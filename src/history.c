@@ -1,3 +1,4 @@
+#include "logger.h"
 #include "process.h"
 #include <stdio.h>
 
@@ -17,7 +18,7 @@ int is_history_full(void) { return history_count >= MAX_HISTORY; }
 
 void record_history_entry(const Process *process) {
   if (is_history_full()) {
-    fprintf(stderr, "히스토리가 꽉 찼어요. 더 이상 저장하지 않아요.\n");
+    logger(LOG_ERROR, "히스토리가 꽉 찼어요. 더 이상 저장하지 않아요.");
     return;
   }
 
@@ -26,7 +27,7 @@ void record_history_entry(const Process *process) {
 
 void record_idle_entry(void) {
   if (is_history_full()) {
-    fprintf(stderr, "히스토리가 꽉 찼어요. 더 이상 저장하지 않아요.\n");
+    logger(LOG_ERROR, "히스토리가 꽉 찼어요. 더 이상 저장하지 않아요.");
     return;
   }
 
@@ -34,32 +35,34 @@ void record_idle_entry(void) {
 }
 
 void print_history(void) {
-  printf("\n[히스토리]\n");
+  printf("\n  [히스토리]\n");
 
   if (history_count == 0) {
-    printf("  (기록 없음)\n");
+    printf("    (기록 없음)\n");
     return;
   }
 
   for (int i = 0; i < history_count; i++) {
     Process *p = &history[i];
 
+    printf("    ");
+    print_duration(i, i + 1);
+
     if (p->pid == IDLE_PROCESS.pid) {
-      printf("Time %d~%d — CPU idle\n", i, i + 1);
+      printf("IDLE\n");
 
       continue;
     }
 
-    printf("Time %d~%d — 프로세스 %d (%d/%d)\n", i, i + 1, p->pid,
-           p->cpu_burst - p->remaining_cpu_burst, p->cpu_burst);
+    printf("프로세스 %d (%d/%d)\n", p->pid, p->cpu_burst - p->remaining_cpu_burst, p->cpu_burst);
   }
 }
 
 void print_block_gantt_chart(void) {
-  printf("\n[Gantt 차트]\n");
+  printf("\n  [Gantt 차트]\n");
 
   if (history_count == 0) {
-    printf("  (기록 없음)");
+    printf("    (기록 없음)");
     return;
   }
 
@@ -69,12 +72,13 @@ void print_block_gantt_chart(void) {
     if (i == history_count || history[i].pid != history[start].pid) {
       Process *p = &history[start];
 
-      printf("Time %d~%d", start, i);
+      printf("    ");
+      print_duration(start, i);
 
       if (p->pid == IDLE_PROCESS.pid) {
-        printf(" — CPU idle\n");
+        printf("IDLE\n");
       } else {
-        printf(" — 프로세스 %d (%d/%d)\n", p->pid, i - start, p->cpu_burst);
+        printf("프로세스 %d (%d/%d)\n", p->pid, i - start, p->cpu_burst);
       }
 
       start = i;
@@ -83,12 +87,14 @@ void print_block_gantt_chart(void) {
 }
 
 void print_inline_gantt_chart(void) {
-  printf("\n[Gantt 차트]\n");
+  printf("\n  [Gantt 차트]\n");
 
   if (history_count == 0) {
-    printf("  (기록 없음)");
+    printf("    (기록 없음)");
     return;
   }
+
+  printf("    ");
 
   int start = 0;
 

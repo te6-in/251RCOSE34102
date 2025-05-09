@@ -47,10 +47,10 @@ int dequeue(Process *process) {
 int is_queue_empty(void) { return head == NULL; }
 
 void print_queue(void) {
-  printf("    [대기 큐] ");
+  printf("    [대기 큐]\n");
 
   if (!head) {
-    printf("(비어 있음)\n");
+    printf("      (비어 있음)\n");
 
     return;
   }
@@ -58,10 +58,8 @@ void print_queue(void) {
   ProcessNode *cur = head;
 
   while (cur) {
-    printf("P%d (%d 남음) ", cur->process.pid, cur->process.remaining_cpu_burst);
+    printf("      P%d (%d 남음)\n", cur->process.pid, cur->process.remaining_cpu_burst);
 
     cur = cur->next;
   }
-
-  printf("\n");
 }
