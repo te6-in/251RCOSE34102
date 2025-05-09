@@ -1,53 +1,9 @@
+#include "history.h"
 #include "process.h"
 #include "queue.h"
 #include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
-
-#define MAX_HISTORY 1000
-
-static const Process IDLE_PROCESS = {
-    .pid = -1,
-    .arrival = -1,
-    .cpu_burst = -1,
-    .remaining_cpu_burst = -1,
-};
-
-Process history[MAX_HISTORY];
-int history_count = 0;
-
-int is_history_full(void) { return history_count >= MAX_HISTORY; }
-
-void record_history_entry(const Process *process) {
-  if (is_history_full())
-    return;
-
-  history[history_count++] = *process;
-}
-
-void record_idle_entry(void) {
-  if (is_history_full())
-    return;
-
-  history[history_count++] = IDLE_PROCESS;
-}
-
-void print_history(void) {
-  printf("\n[히스토리]\n");
-
-  for (int i = 0; i < history_count; i++) {
-    Process *p = &history[i];
-
-    if (p->pid == IDLE_PROCESS.pid) {
-      printf("Time %d~%d — CPU idle\n", i, i + 1);
-
-      continue;
-    }
-
-    printf("Time %d~%d — 프로세스 %d (%d/%d)\n", i, i + 1, p->pid,
-           p->cpu_burst - p->remaining_cpu_burst, p->cpu_burst);
-  }
-}
 
 static void print_state(Process *running_process) {
   if (running_process->remaining_cpu_burst > 0) {
@@ -84,7 +40,8 @@ int main(void) {
       choice = input[0];
 
       if (choice == 'y' || choice == 'Y' || choice == 'n' || choice == 'N' || choice == 'q' ||
-          choice == 'Q' || choice == 's' || choice == 'S' || choice == 'h' || choice == 'H') {
+          choice == 'Q' || choice == 's' || choice == 'S' || choice == 'h' || choice == 'H' ||
+          choice == 'g' || choice == 'G') {
         break;
       }
     }
@@ -98,6 +55,12 @@ int main(void) {
     case 'h':
     case 'H':
       print_history();
+      continue;
+
+    case 'g':
+    case 'G':
+      print_block_gantt_chart();
+      print_inline_gantt_chart();
       continue;
 
     case 's':

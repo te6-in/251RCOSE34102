@@ -17,6 +17,6 @@ int get_positive_int(const char *prompt) {
     if (sscanf(buffer, "%d", &value) == 1 && value > 0)
       return value;
 
-    puts("양의 정수를 입력해 주세요.");
+    printf("양의 정수를 입력해 주세요.");
   }
 }
