@@ -2,8 +2,10 @@
 #include "process.h"
 #include "queue.h"
 #include "utils.h"
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 static void print_state(Process *running_process) {
   if (running_process->remaining_cpu_burst > 0) {
@@ -37,39 +39,31 @@ int main(void) {
       if (!fgets(input, sizeof(input), stdin)) // EOF
         end_simulator(current_time);
 
-      choice = input[0];
+      choice = tolower(input[0]);
 
-      if (choice == 'y' || choice == 'Y' || choice == 'n' || choice == 'N' || choice == 'q' ||
-          choice == 'Q' || choice == 's' || choice == 'S' || choice == 'h' || choice == 'H' ||
-          choice == 'g' || choice == 'G') {
+      if (strchr("ynqshg", choice))
         break;
-      }
     }
 
     switch (choice) {
     case 'q':
-    case 'Q':
       end_simulator(current_time);
       break;
 
     case 'h':
-    case 'H':
       print_history();
       continue;
 
     case 'g':
-    case 'G':
       print_block_gantt_chart();
       print_inline_gantt_chart();
       continue;
 
     case 's':
-    case 'S':
       print_state(&running_process);
       continue;
 
     case 'y':
-    case 'Y':
       int burst = get_positive_int("    CPU burst: ");
 
       enqueue((Process){

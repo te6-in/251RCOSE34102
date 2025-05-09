@@ -10,7 +10,7 @@ static const Process IDLE_PROCESS = {
     .remaining_cpu_burst = -1,
 };
 
-Process history[MAX_HISTORY];
+static Process history[MAX_HISTORY];
 static int history_count = 0;
 
 int is_history_full(void) { return history_count >= MAX_HISTORY; }
