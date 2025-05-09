@@ -4,13 +4,6 @@
 
 #define MAX_HISTORY 1000
 
-static const Process IDLE_PROCESS = {
-    .pid = -1,
-    .arrival = -1,
-    .cpu_burst = -1,
-    .remaining_cpu_burst = -1,
-};
-
 static Process history[MAX_HISTORY];
 static int history_count = 0;
 
@@ -31,7 +24,7 @@ void record_idle_entry(void) {
     return;
   }
 
-  history[history_count++] = IDLE_PROCESS;
+  history[history_count++] = NULL_PROCESS; // history이므로 여기는 값 복사해서 저장
 }
 
 void print_history(void) {
@@ -48,13 +41,13 @@ void print_history(void) {
     printf("    ");
     print_duration(i, i + 1);
 
-    if (p->pid == IDLE_PROCESS.pid) {
+    if (p->pid == NULL_PROCESS.pid) {
       printf("IDLE\n");
 
       continue;
     }
 
-    printf("프로세스 %d (%d/%d)\n", p->pid, p->cpu_burst - p->remaining_cpu_burst, p->cpu_burst);
+    printf("프로세스 %d (%d/%d)\n", p->pid, p->cpu_burst - p->cpu_burst_remaining, p->cpu_burst);
   }
 }
 
@@ -75,7 +68,7 @@ void print_block_gantt_chart(void) {
       printf("    ");
       print_duration(start, i);
 
-      if (p->pid == IDLE_PROCESS.pid) {
+      if (p->pid == NULL_PROCESS.pid) {
         printf("IDLE\n");
       } else {
         printf("프로세스 %d (%d/%d)\n", p->pid, i - start, p->cpu_burst);
@@ -104,7 +97,7 @@ void print_inline_gantt_chart(void) {
 
       printf("%d - ", start);
 
-      if (p->pid == IDLE_PROCESS.pid) {
+      if (p->pid == NULL_PROCESS.pid) {
         printf("IDLE");
       } else {
         printf("프로세스 %d (%d/%d)", p->pid, i - start, p->cpu_burst);

@@ -4,13 +4,18 @@
 #include "process.h"
 
 typedef struct ProcessNode {
-  Process process;
+  Process *process;
   struct ProcessNode *next;
 } ProcessNode;
 
-void enqueue(Process process);
-int dequeue(Process *process);
-int is_queue_empty(void);
-void print_queue(void);
+void enqueue_ready(Process *process);
+int dequeue_ready(Process **process);
+int is_ready_queue_empty(void);
+void print_ready_queue(void);
+
+void enqueue_io(Process *process);
+int dequeue_io(Process **process);
+int is_io_queue_empty(void);
+void print_io_queue(void);
 
 #endif
