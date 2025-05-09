@@ -6,7 +6,7 @@
 static ProcessNode *head = NULL;
 static ProcessNode *tail = NULL;
 
-void enqueue(Process p) {
+void enqueue(Process process) {
   ProcessNode *node = malloc(sizeof(ProcessNode));
 
   if (!node) {
@@ -14,7 +14,7 @@ void enqueue(Process p) {
     exit(1);
   }
 
-  node->p = p;
+  node->process = process;
   node->next = NULL;
 
   if (!tail) {
@@ -27,13 +27,13 @@ void enqueue(Process p) {
   tail = node;
 }
 
-int dequeue(Process *out) {
+int dequeue(Process *process) {
   if (!head)
     return 0;
 
   ProcessNode *tmp = head;
 
-  *out = tmp->p;
+  *process = tmp->process;
   head = head->next;
 
   if (!head)
@@ -58,7 +58,7 @@ void print_queue(void) {
   ProcessNode *cur = head;
 
   while (cur) {
-    printf("P%d (%d 남음) ", cur->p.pid, cur->p.remaining_cpu_burst);
+    printf("P%d (%d 남음) ", cur->process.pid, cur->process.remaining_cpu_burst);
 
     cur = cur->next;
   }
