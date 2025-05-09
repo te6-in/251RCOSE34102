@@ -1,5 +1,6 @@
 #include "queue.h"
 #include "process.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -118,4 +119,13 @@ void print_io_queue(void) {
     printf("      P%d (I/O %d 남음)\n", cur->process->pid, cur->process->io_burst_remaining);
     cur = cur->next;
   }
+}
+
+bool peek_io_queue(Process **process) {
+  if (is_io_queue_empty())
+    return false;
+
+  *process = io_head->process;
+
+  return true;
 }

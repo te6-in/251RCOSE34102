@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+int current_time = 0;
+
 static void print_process_status(Process *process) {
   if (!process) {
     logger(LOG_INFO, "현재 실행 중인 프로세스 없음\n");
@@ -29,14 +31,50 @@ static void print_process_status(Process *process) {
   }
 }
 
+void tick_io_queue(void) {
+  Process *process;
+
+  // I/O 큐 헤드 확인, 있다면 버스트 감소한 이후 0인지 확인, 0이 아니면 tick_io_queue() 종료
+  // while (peek_io_queue(&process) && --(process->io_burst_remaining) == 0) {
+  //   // 0인 경우 I/O 큐에서 프로세스 제거 후 레디 큐 맨 뒤로 추가
+  //   process->is_in_io = false;
+  //   dequeue_io(&process);
+
+  //   enqueue_ready(process);
+  // }
+
+  // rewrite
+
+  if (!peek_io_queue(&process))
+    return;
+
+  (process->io_burst_remaining)--;
+
+  if (process->io_burst_remaining > 0)
+    return;
+
+  // I/O 큐에서 프로세스 제거 후 레디 큐 맨 뒤로 추가
+
+  process->is_in_io = false;
+  dequeue_io(&process);
+  enqueue_ready(process);
+
+  print_time(current_time);
+  printf("프로세스 %d I/O 완료 (I/O %d 남음)\n", process->pid, process->io_burst_remaining);
+}
+
 static void end_simulator(int current_time) {
   logger(LOG_INFO, "시뮬레이터 종료 시각: %d", current_time);
 
   exit(0);
 }
 
+static void tick(void) {
+  current_time++;
+  tick_io_queue();
+}
+
 int main(void) {
-  int current_time = 0;
   int pid_counter = 1;
   Process *running_process = NULL;
 
@@ -127,7 +165,7 @@ int main(void) {
 
         record_idle_entry();
 
-        current_time++;
+        tick();
         continue;
       }
 
@@ -135,8 +173,10 @@ int main(void) {
     }
 
     // dequeue 필요한 경우 2: 현재 실행 중인 프로세스가 I/O 들어감
-    if (running_process && (running_process->cpu_burst - running_process->cpu_burst_remaining ==
-                            running_process->io_request_time)) {
+    if (running_process && running_process->is_in_io == false &&
+        running_process->io_burst_remaining > 0 &&
+        (running_process->cpu_burst - running_process->cpu_burst_remaining ==
+         running_process->io_request_time)) {
       print_time(current_time);
       printf("프로세스 %d I/O 요청 시작 (burst %d 남음, I/O %d 예정)\n", running_process->pid,
              running_process->cpu_burst_remaining, running_process->io_burst_remaining);
@@ -153,7 +193,8 @@ int main(void) {
 
         record_idle_entry();
 
-        current_time++;
+        tick();
+
         continue;
       }
 
@@ -175,7 +216,7 @@ int main(void) {
 
     record_history_entry(running_process);
 
-    current_time++;
+    tick();
 
     // 프로세스 종료
     if (running_process->cpu_burst_remaining == 0) {

@@ -2,6 +2,7 @@
 #define QUEUE_H
 
 #include "process.h"
+#include <stdbool.h>
 
 typedef struct ProcessNode {
   Process *process;
@@ -17,5 +18,6 @@ void enqueue_io(Process *process);
 int dequeue_io(Process **process);
 int is_io_queue_empty(void);
 void print_io_queue(void);
+bool peek_io_queue(Process **process);
 
 #endif
