@@ -1,7 +1,7 @@
 #include "history.h"
 #include "logger.h"
 #include "process.h"
-#include "queue.h"
+#include "queues.h"
 #include "stats.h"
 #include "utils.h"
 #include <ctype.h>
