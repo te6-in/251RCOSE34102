@@ -115,7 +115,7 @@ void print_io_queue(void) {
 
   ProcessNode *cur = io_head;
   while (cur) {
-    printf("      P%d (i/o %d 남음)\n", cur->process->pid, cur->process->io_burst_remaining);
+    printf("      P%d (I/O %d 남음)\n", cur->process->pid, cur->process->io_burst_remaining);
     cur = cur->next;
   }
 }
