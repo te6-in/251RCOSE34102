@@ -4,19 +4,22 @@
 #include <stdbool.h>
 
 typedef struct {
+  // meta
   int pid;
-
+  int arrived_at;
   // int priority;
 
-  int arrival;
+  // cpu
+  int cpu_burst, cpu_burst_remaining;
 
-  int cpu_burst;
-  int cpu_burst_remaining;
-
-  int io_burst;
-  int io_burst_remaining;
-  int io_request_time;
+  // io
+  int io_burst, io_burst_remaining, io_request_time;
   bool is_in_io;
+
+  // stats
+  int started_at;
+  int last_ready_enqueued_at;
+  int waiting;
 } Process;
 
 extern const Process NULL_PROCESS;

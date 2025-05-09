@@ -3,7 +3,7 @@
 const Process NULL_PROCESS = {
     .pid = -1,
 
-    .arrival = -1,
+    .arrived_at = -1,
 
     .cpu_burst = -1,
     .cpu_burst_remaining = -1,
@@ -12,4 +12,8 @@ const Process NULL_PROCESS = {
     .io_burst_remaining = -1,
     .io_request_time = -1,
     .is_in_io = false,
+
+    .started_at = -1,
+    .last_ready_enqueued_at = -1,
+    .waiting = -1,
 };

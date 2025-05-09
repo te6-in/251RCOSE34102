@@ -2,6 +2,7 @@
 #include "logger.h"
 #include "process.h"
 #include "queue.h"
+#include "stats.h"
 #include "utils.h"
 #include <ctype.h>
 #include <stdbool.h>
@@ -18,12 +19,14 @@ static void print_process_status(Process *process) {
     return;
   }
 
+  // TODO: usage 필요
   if (process->is_in_io) {
     printf("    [I/O 중] P%d (%d 남음)\n", process->pid, process->io_burst_remaining);
 
     return;
   }
 
+  // TODO: usage 필요
   if (process->cpu_burst_remaining > 0) {
     printf("    [실행 중] P%d (%d 남음)\n", process->pid, process->cpu_burst_remaining);
 
@@ -47,13 +50,16 @@ void tick_io_queue(void) {
   process->is_in_io = false;
   dequeue_io(&process);
   enqueue_ready(process);
+  process->last_ready_enqueued_at = current_time;
 
   print_time(current_time);
   printf("프로세스 %d I/O 완료 (I/O %d 남음)\n", process->pid, process->io_burst_remaining);
 }
 
 static void end_simulator(int current_time) {
-  logger(LOG_INFO, "시뮬레이터 종료 시각: %d", current_time);
+  logger(LOG_INFO, "시뮬레이터 종료 시각: %d\n", current_time);
+
+  print_stats();
 
   exit(0);
 }
@@ -129,8 +135,7 @@ int main(void) {
 
         *new_process = (Process){
             .pid = pid_counter++,
-
-            .arrival = current_time,
+            .arrived_at = current_time,
 
             .cpu_burst = cpu_burst,
             .cpu_burst_remaining = cpu_burst,
@@ -139,6 +144,10 @@ int main(void) {
             .io_burst_remaining = io_burst,
             .io_request_time = io_request_time,
             .is_in_io = false,
+
+            .started_at = -1,
+            .last_ready_enqueued_at = current_time,
+            .waiting = 0,
         };
 
         enqueue_ready(new_process);
@@ -174,10 +183,13 @@ int main(void) {
       }
 
       dequeue_ready(&running_process);
+      running_process->waiting += current_time - running_process->last_ready_enqueued_at;
     }
 
     // 처음 실행하는 프로세스
     if (running_process->cpu_burst_remaining == running_process->cpu_burst) {
+      running_process->started_at = current_time;
+
       print_time(current_time);
       printf("프로세스 %d 실행 시작 (burst %d 예정)\n", running_process->pid,
              running_process->cpu_burst_remaining);
@@ -194,9 +206,13 @@ int main(void) {
 
     // 프로세스 종료
     if (running_process->cpu_burst_remaining == 0) {
+      int turnaround = current_time - running_process->arrived_at;
+
       print_time(current_time);
-      printf("프로세스 %d 종료 (burst %d 완료)\n", running_process->pid,
-             running_process->cpu_burst);
+      printf("프로세스 %d 종료 (burst %d 완료, turnaround %d, wait %d)\n", running_process->pid,
+             running_process->cpu_burst, turnaround, running_process->waiting);
+
+      add_to_stats(turnaround, running_process->waiting);
 
       free(running_process);
       running_process = NULL;
