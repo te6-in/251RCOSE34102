@@ -34,27 +34,16 @@ static void print_process_status(Process *process) {
 void tick_io_queue(void) {
   Process *process;
 
-  // I/O 큐 헤드 확인, 있다면 버스트 감소한 이후 0인지 확인, 0이 아니면 tick_io_queue() 종료
-  // while (peek_io_queue(&process) && --(process->io_burst_remaining) == 0) {
-  //   // 0인 경우 I/O 큐에서 프로세스 제거 후 레디 큐 맨 뒤로 추가
-  //   process->is_in_io = false;
-  //   dequeue_io(&process);
-
-  //   enqueue_ready(process);
-  // }
-
-  // rewrite
-
   if (!peek_io_queue(&process))
     return;
 
+  // I/O 큐에 프로세스 있는 경우 head의 remaining -1
   (process->io_burst_remaining)--;
 
   if (process->io_burst_remaining > 0)
     return;
 
-  // I/O 큐에서 프로세스 제거 후 레디 큐 맨 뒤로 추가
-
+  // -1 했더니 0인 경우 I/O 큐에서 프로세스 제거 후 레디 큐 맨 뒤로 추가
   process->is_in_io = false;
   dequeue_io(&process);
   enqueue_ready(process);
@@ -156,23 +145,7 @@ int main(void) {
       }
     }
 
-    // dequeue 필요한 경우 1: 현재 실행 중인 프로세스가 없음
-    if (!running_process || running_process->cpu_burst_remaining <= 0) {
-      // 대기 큐 없음
-      if (is_ready_queue_empty()) {
-        print_duration(current_time, current_time + 1);
-        printf("IDLE\n");
-
-        record_idle_entry();
-
-        tick();
-        continue;
-      }
-
-      dequeue_ready(&running_process);
-    }
-
-    // dequeue 필요한 경우 2: 현재 실행 중인 프로세스가 I/O 들어감
+    // 현재 실행 중인 프로세스가 I/O 들어가야 하는 경우
     if (running_process && running_process->is_in_io == false &&
         running_process->io_burst_remaining > 0 &&
         (running_process->cpu_burst - running_process->cpu_burst_remaining ==
@@ -184,15 +157,17 @@ int main(void) {
       running_process->is_in_io = true;
       enqueue_io(running_process);
 
+      // running_process가 I/O 큐에 들어가면 running_process는 NULL
       running_process = NULL;
+    }
 
-      // 대기 큐 없음
+    // 현재 실행 중인 프로세스가 원래 없었거나, I/O 큐에 들어가서 NULL이 되었을 수 있음
+    if (!running_process) {
       if (is_ready_queue_empty()) {
         print_duration(current_time, current_time + 1);
         printf("IDLE\n");
 
         record_idle_entry();
-
         tick();
 
         continue;
@@ -215,7 +190,6 @@ int main(void) {
            running_process->cpu_burst_remaining);
 
     record_history_entry(running_process);
-
     tick();
 
     // 프로세스 종료
