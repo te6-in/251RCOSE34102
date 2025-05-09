@@ -2,15 +2,41 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "빌드",
+      "label": "clean",
       "type": "shell",
-      "command": "make",
+      "command": "make clean",
+      "group": {
+        "kind": "none"
+      }
+    },
+    {
+      "label": "개발",
+      "type": "shell",
+      "command": "make dev",
       "group": {
         "kind": "build",
         "isDefault": true
       },
       "problemMatcher": [
         "$gcc"
+      ],
+      "dependsOn": [
+        "clean"
+      ]
+    },
+    {
+      "label": "빌드",
+      "type": "shell",
+      "command": "make build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "dependsOn": [
+        "clean"
       ]
     }
   ]

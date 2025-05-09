@@ -10,7 +10,7 @@
       "request": "launch",
       "program": "${workspaceFolder}/bin/sim",
       "cwd": "${workspaceFolder}",
-      "preLaunchTask": "빌드"
+      "preLaunchTask": "개발"
     }
   ]
 }
