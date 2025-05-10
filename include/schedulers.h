@@ -15,6 +15,4 @@ typedef struct Scheduler {
   void (*print_state)(struct Scheduler *);
 } Scheduler;
 
-Scheduler *scheduler_fcfs(void);
-
 #endif

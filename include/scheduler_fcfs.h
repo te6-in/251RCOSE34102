@@ -3,6 +3,6 @@
 
 #include "schedulers.h"
 
-Scheduler *scheduler_fcfs(void);
+Scheduler *create_fcfs_scheduler(void);
 
 #endif

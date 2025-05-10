@@ -9,6 +9,7 @@ typedef struct {
 
 static void fcfs_enqueue(Scheduler *scheduler, Process *process) {
   FcfsState *state = scheduler->state;
+
   enqueue(state->ready_queue, process);
 }
 
@@ -43,12 +44,12 @@ static void fcfs_print_state(Scheduler *scheduler) {
   print_queue(state->ready_queue);
 }
 
-Scheduler *scheduler_fcfs(void) {
+Scheduler *create_fcfs_scheduler(void) {
   FcfsState *state = calloc(1, sizeof *state); // state.dummy = 0으로 초기화
   state->ready_queue = create_queue();
 
-  Scheduler *sched = malloc(sizeof *sched);
-  *sched = (Scheduler){
+  Scheduler *scheduler = malloc(sizeof *scheduler);
+  *scheduler = (Scheduler){
       .name = "FCFS",
 
       .enqueue = fcfs_enqueue,
@@ -60,5 +61,5 @@ Scheduler *scheduler_fcfs(void) {
       .print_state = fcfs_print_state,
   };
 
-  return sched;
+  return scheduler;
 }

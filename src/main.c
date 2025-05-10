@@ -2,6 +2,7 @@
 #include "logger.h"
 #include "process.h"
 #include "process_queue.h"
+#include "scheduler_fcfs.h"
 #include "schedulers.h"
 #include "stats.h"
 #include "utils.h"
@@ -80,7 +81,7 @@ int main(void) {
   Process *running_process = NULL;
   io_queue = create_queue();
 
-  scheduler = scheduler_fcfs();
+  scheduler = create_fcfs_scheduler();
   logger(LOG_INFO, "%s 스케줄러를 실행할게요", scheduler->name);
 
   while (1) {
