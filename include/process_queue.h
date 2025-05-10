@@ -4,7 +4,15 @@
 #include "process.h"
 #include <stdbool.h>
 
-typedef struct ProcessQueue ProcessQueue;
+typedef struct ProcessNode {
+  Process *process;
+  struct ProcessNode *next;
+} ProcessNode;
+
+typedef struct ProcessQueue {
+  ProcessNode *head;
+  ProcessNode *tail;
+} ProcessQueue;
 
 ProcessQueue *create_queue(void);
 void destroy_queue(ProcessQueue *queue);

@@ -4,16 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct ProcessNode {
-  Process *process;
-  struct ProcessNode *next;
-} ProcessNode;
-
-typedef struct ProcessQueue {
-  ProcessNode *head;
-  ProcessNode *tail;
-} ProcessQueue;
-
 ProcessQueue *create_queue(void) {
   return calloc(1, sizeof(ProcessQueue)); // head와 tail을 0(NULL)으로 초기화한 queue 반환
 }

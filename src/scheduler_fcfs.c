@@ -10,7 +10,34 @@ typedef struct {
 static void fcfs_enqueue(Scheduler *scheduler, Process *process) {
   FcfsState *state = scheduler->state;
 
-  enqueue(state->ready_queue, process);
+  ProcessQueue *queue = state->ready_queue;
+
+  ProcessNode *new_node = malloc(sizeof(ProcessNode));
+  new_node->process = process;
+  new_node->next = NULL;
+
+  // 큐가 비어있거나, 새로운 프로세스의 arrived_at이 맨 앞 프로세스보다 빠른 경우
+  // 맨 앞에 넣기만 하면 됨
+  if (!queue->head || process->arrived_at < queue->head->process->arrived_at) {
+    new_node->next = queue->head;
+    queue->head = new_node;
+
+    if (!queue->tail) // 큐가 비어있었던 경우
+      queue->tail = new_node;
+
+    return;
+  }
+
+  ProcessNode *current = queue->head;
+  while (current->next && current->next->process->arrived_at <= process->arrived_at) {
+    current = current->next;
+  }
+
+  new_node->next = current->next;
+  current->next = new_node;
+
+  if (!new_node->next) // 큐의 맨 뒤에 추가된 경우
+    queue->tail = new_node;
 }
 
 static Process *fcfs_pick_next(Scheduler *scheduler) {
@@ -18,6 +45,8 @@ static Process *fcfs_pick_next(Scheduler *scheduler) {
 
   Process *process = NULL;
 
+  // enqueue에서 arrived_at 순으로 정렬해서 넣어줬으므로
+  // 벌크로 등록되더라도 arrived_at이 가장 작은 프로세스가 맨 앞에 위치
   if (!dequeue(state->ready_queue, &process))
     return NULL;
 
