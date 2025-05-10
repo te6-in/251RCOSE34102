@@ -13,6 +13,8 @@ typedef struct Scheduler {
 
   void *state;
   void (*print_state)(struct Scheduler *);
+
+  int (*get_left_process_count)(struct Scheduler *);
 } Scheduler;
 
 #endif

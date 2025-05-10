@@ -1,3 +1,4 @@
+#include "executor.h"
 #include "history.h"
 #include "logger.h"
 #include "process.h"
@@ -38,28 +39,6 @@ static void print_process_status(Process *process) {
   }
 }
 
-void tick_io_queue(void) {
-  Process *process;
-
-  if (!peek(io_queue, &process))
-    return;
-
-  // I/O 큐에 프로세스 있는 경우 head의 remaining -1
-  (process->io_burst_remaining)--;
-
-  if (process->io_burst_remaining > 0)
-    return;
-
-  // -1 했더니 0인 경우 I/O 큐에서 프로세스 제거 후 레디 큐 맨 뒤로 추가
-  process->is_in_io = false;
-  dequeue(io_queue, &process);
-  scheduler->enqueue(scheduler, process);
-  process->last_ready_enqueued_at = current_time;
-
-  print_time(current_time);
-  printf("프로세스 %d I/O 완료 (I/O %d 남음)\n", process->pid, process->io_burst_remaining);
-}
-
 static void end_simulator(int current_time) {
   logger(LOG_INFO, "시뮬레이터 종료 시각: %d\n", current_time);
 
@@ -69,14 +48,6 @@ static void end_simulator(int current_time) {
   destroy_queue(io_queue);
 
   exit(0);
-}
-
-static void tick(void) {
-  current_time++;
-
-  tick_io_queue();
-
-  scheduler->on_tick(scheduler);
 }
 
 int main(void) {
@@ -93,14 +64,14 @@ int main(void) {
 
     while (1) {
       print_time(current_time);
-      printf("무엇을 할까요? (new/continue/status/history/gantt/quit): ");
+      printf("무엇을 할까요? (new/continue/finish/status/history/gantt/quit): ");
 
       if (!fgets(input, sizeof(input), stdin)) // EOF
         end_simulator(current_time);
 
       choice = tolower(input[0]);
 
-      if (strchr("ncshgq", choice))
+      if (strchr("ncfshgq", choice))
         break;
     }
 
@@ -126,6 +97,10 @@ int main(void) {
     case 'g':
       print_block_gantt_chart();
       print_inline_gantt_chart();
+      continue;
+
+    case 'f':
+      execute_until_all_done(scheduler, io_queue, &running_process, &current_time);
       continue;
 
     case 'n':
@@ -170,73 +145,7 @@ int main(void) {
       }
     }
 
-    // 현재 실행 중인 프로세스가 I/O 들어가야 하는 경우
-    if (running_process && running_process->is_in_io == false &&
-        running_process->io_burst_remaining > 0 &&
-        (running_process->cpu_burst - running_process->cpu_burst_remaining ==
-         running_process->io_request_time)) {
-      print_time(current_time);
-      printf("프로세스 %d I/O 요청 시작 (burst %d 남음, I/O %d 예정)\n", running_process->pid,
-             running_process->cpu_burst_remaining, running_process->io_burst_remaining);
-
-      running_process->is_in_io = true;
-      enqueue(io_queue, running_process);
-
-      // running_process가 I/O 큐에 들어가면 running_process는 NULL
-      running_process = NULL;
-    }
-
-    // 현재 실행 중인 프로세스가 원래 없었거나, I/O 큐에 들어가서 NULL이 되었을 수 있음
-    if (!running_process) {
-      // 새로 꺼내기
-      running_process = scheduler->pick_next(scheduler);
-
-      // 스케줄러가 줄 수 있는 프로세스가 없는 경우
-      if (!running_process) {
-        print_duration(current_time, current_time + 1);
-        printf("IDLE\n");
-
-        record_idle_entry();
-        tick();
-
-        continue;
-      }
-
-      // 꺼내짐
-      running_process->waiting += current_time - running_process->last_ready_enqueued_at;
-    }
-
-    // 처음 실행하는 프로세스
-    if (running_process->cpu_burst_remaining == running_process->cpu_burst) {
-      running_process->started_at = current_time;
-
-      print_time(current_time);
-      printf("프로세스 %d 실행 시작 (burst %d 예정)\n", running_process->pid,
-             running_process->cpu_burst_remaining);
-    }
-
-    running_process->cpu_burst_remaining--;
-
-    print_duration(current_time, current_time + 1);
-    printf("프로세스 %d 실행  (burst %d 남음)\n", running_process->pid,
-           running_process->cpu_burst_remaining);
-
-    record_history_entry(running_process);
-    tick();
-
-    // 프로세스 종료
-    if (running_process->cpu_burst_remaining == 0) {
-      int turnaround = current_time - running_process->arrived_at;
-
-      print_time(current_time);
-      printf("프로세스 %d 종료 (burst %d 완료, turnaround %d, wait %d)\n", running_process->pid,
-             running_process->cpu_burst, turnaround, running_process->waiting);
-
-      add_to_stats(turnaround, running_process->waiting);
-
-      free(running_process);
-      running_process = NULL;
-    }
+    execute_one_tick(scheduler, io_queue, &running_process, &current_time);
   }
 
   end_simulator(current_time);

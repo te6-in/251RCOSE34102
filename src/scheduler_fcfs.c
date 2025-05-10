@@ -44,6 +44,12 @@ static void fcfs_print_state(Scheduler *scheduler) {
   print_queue(state->ready_queue);
 }
 
+static int fcfs_get_left_process_count(Scheduler *scheduler) {
+  FcfsState *state = scheduler->state;
+
+  return get_queue_size(state->ready_queue);
+}
+
 Scheduler *create_fcfs_scheduler(void) {
   FcfsState *state = calloc(1, sizeof *state); // state.dummy = 0으로 초기화
   state->ready_queue = create_queue();
@@ -59,6 +65,8 @@ Scheduler *create_fcfs_scheduler(void) {
 
       .state = state,
       .print_state = fcfs_print_state,
+
+      .get_left_process_count = fcfs_get_left_process_count,
   };
 
   return scheduler;

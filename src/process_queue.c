@@ -76,6 +76,19 @@ bool peek(ProcessQueue *queue, Process **process) {
   return true;
 }
 
+int get_queue_size(ProcessQueue *queue) {
+  int size = 0;
+  ProcessNode *current = queue->head;
+
+  while (current) {
+    size++;
+
+    current = current->next;
+  }
+
+  return size;
+}
+
 void print_queue(ProcessQueue *queue) {
   if (is_empty(queue)) {
     printf("      (비어 있음)\n");
