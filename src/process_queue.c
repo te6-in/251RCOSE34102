@@ -35,11 +35,6 @@ void destroy_queue(ProcessQueue *queue) {
 void enqueue(ProcessQueue *queue, Process *process) {
   ProcessNode *node = malloc(sizeof(ProcessNode));
 
-  if (!node) {
-    perror("malloc");
-    exit(1);
-  }
-
   node->process = process;
   node->next = NULL;
 
