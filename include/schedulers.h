@@ -12,6 +12,7 @@ typedef struct Scheduler {
   void (*destroy)(struct Scheduler *);
 
   void *state;
+  void (*print_state)(struct Scheduler *);
 } Scheduler;
 
 Scheduler *scheduler_fcfs(void);

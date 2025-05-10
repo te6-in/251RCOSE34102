@@ -1,7 +1,7 @@
 #include "history.h"
 #include "logger.h"
 #include "process.h"
-#include "queues.h"
+#include "process_queue.h"
 #include "schedulers.h"
 #include "stats.h"
 #include "utils.h"
@@ -13,6 +13,7 @@
 
 int current_time = 0;
 static Scheduler *scheduler = NULL;
+static ProcessQueue *io_queue = NULL;
 
 static void print_process_status(Process *process) {
   if (!process) {
@@ -39,7 +40,7 @@ static void print_process_status(Process *process) {
 void tick_io_queue(void) {
   Process *process;
 
-  if (!peek_io_queue(&process))
+  if (!peek(io_queue, &process))
     return;
 
   // I/O 큐에 프로세스 있는 경우 head의 remaining -1
@@ -50,7 +51,7 @@ void tick_io_queue(void) {
 
   // -1 했더니 0인 경우 I/O 큐에서 프로세스 제거 후 레디 큐 맨 뒤로 추가
   process->is_in_io = false;
-  dequeue_io(&process);
+  dequeue(io_queue, &process);
   scheduler->enqueue(scheduler, process);
   process->last_ready_enqueued_at = current_time;
 
@@ -77,6 +78,7 @@ static void tick(void) {
 int main(void) {
   int pid_counter = 1;
   Process *running_process = NULL;
+  io_queue = create_queue();
 
   scheduler = scheduler_fcfs();
   logger(LOG_INFO, "%s 스케줄러를 실행할게요", scheduler->name);
@@ -105,8 +107,12 @@ int main(void) {
 
     case 's':
       print_process_status(running_process);
-      print_ready_queue();
-      print_io_queue();
+
+      scheduler->print_state(scheduler);
+
+      printf("\n    I/O 상태:\n");
+      printf("      [대기 큐]\n");
+      print_queue(io_queue);
       continue;
 
     case 'h':
@@ -170,7 +176,7 @@ int main(void) {
              running_process->cpu_burst_remaining, running_process->io_burst_remaining);
 
       running_process->is_in_io = true;
-      enqueue_io(running_process);
+      enqueue(io_queue, running_process);
 
       // running_process가 I/O 큐에 들어가면 running_process는 NULL
       running_process = NULL;
