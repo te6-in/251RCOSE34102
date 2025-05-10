@@ -2,6 +2,7 @@
 #include "logger.h"
 #include "process.h"
 #include "queues.h"
+#include "schedulers.h"
 #include "stats.h"
 #include "utils.h"
 #include <ctype.h>
@@ -11,6 +12,7 @@
 #include <string.h>
 
 int current_time = 0;
+static Scheduler *scheduler = NULL;
 
 static void print_process_status(Process *process) {
   if (!process) {
@@ -49,7 +51,7 @@ void tick_io_queue(void) {
   // -1 했더니 0인 경우 I/O 큐에서 프로세스 제거 후 레디 큐 맨 뒤로 추가
   process->is_in_io = false;
   dequeue_io(&process);
-  enqueue_ready(process);
+  scheduler->enqueue(scheduler, process);
   process->last_ready_enqueued_at = current_time;
 
   print_time(current_time);
@@ -66,14 +68,18 @@ static void end_simulator(int current_time) {
 
 static void tick(void) {
   current_time++;
+
   tick_io_queue();
+
+  scheduler->on_tick(scheduler);
 }
 
 int main(void) {
   int pid_counter = 1;
   Process *running_process = NULL;
 
-  logger(LOG_INFO, "FCFS");
+  scheduler = scheduler_fcfs();
+  logger(LOG_INFO, "%s 스케줄러를 실행할게요", scheduler->name);
 
   while (1) {
     char input[16];
@@ -150,7 +156,7 @@ int main(void) {
             .waiting = 0,
         };
 
-        enqueue_ready(new_process);
+        scheduler->enqueue(scheduler, new_process);
       }
     }
 
@@ -172,7 +178,11 @@ int main(void) {
 
     // 현재 실행 중인 프로세스가 원래 없었거나, I/O 큐에 들어가서 NULL이 되었을 수 있음
     if (!running_process) {
-      if (is_ready_queue_empty()) {
+      // 새로 꺼내기
+      running_process = scheduler->pick_next(scheduler);
+
+      // 스케줄러가 줄 수 있는 프로세스가 없는 경우
+      if (!running_process) {
         print_duration(current_time, current_time + 1);
         printf("IDLE\n");
 
@@ -182,7 +192,7 @@ int main(void) {
         continue;
       }
 
-      dequeue_ready(&running_process);
+      // 꺼내짐
       running_process->waiting += current_time - running_process->last_ready_enqueued_at;
     }
 
