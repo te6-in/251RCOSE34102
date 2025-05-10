@@ -52,7 +52,7 @@ void print_history(void) {
 }
 
 void print_block_gantt_chart(void) {
-  printf("\n  [Gantt 차트]\n");
+  printf("\n  [Gantt 표]\n");
 
   if (history_count == 0) {
     printf("    (기록 없음)");

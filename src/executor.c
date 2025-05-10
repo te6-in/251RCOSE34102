@@ -1,5 +1,5 @@
 
-#include "executor.h"
+#include "controller.h"
 #include "history.h"
 #include "logger.h"
 #include "process.h"
@@ -114,7 +114,8 @@ void execute_until_all_done(Scheduler *scheduler, ProcessQueue *io_queue, Proces
   while (1) {
     if (scheduler->get_left_process_count(scheduler) == 0 && is_empty(io_queue) &&
         !*running_process) {
-      logger(LOG_INFO, "모든 프로세스의 스케줄링과 I/O가 완료되었습니다.\n");
+      logger(LOG_INFO,
+             "모든 프로세스의 스케줄링과 I/O가 완료된 상태까지 틱이 실행된 상태입니다.\n");
 
       break;
     }

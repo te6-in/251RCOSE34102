@@ -38,7 +38,6 @@ static void fcfs_destroy(Scheduler *scheduler) {
 static void fcfs_print_state(Scheduler *scheduler) {
   FcfsState *state = scheduler->state;
 
-  printf("\n    FCFS 스케줄러 상태:\n");
   printf("      [레디 큐]\n");
 
   print_queue(state->ready_queue);
