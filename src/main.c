@@ -50,6 +50,47 @@ static void end_simulator(int current_time) {
   exit(0);
 }
 
+static void add_processes(Scheduler *scheduler, int *pid_counter, int current_time) {
+  while (1) {
+    int cpu_burst = get_nonnegative_int("    CPU burst (1 이상, 0 입력하여 추가 완료): ");
+    if (cpu_burst == 0)
+      return;
+
+    int io_burst = get_nonnegative_int("    I/O burst (0 이상): ");
+
+    int io_request_time = -1;
+    while (io_burst > 0) {
+      io_request_time = get_nonnegative_int("    I/O request time (0 이상 CPU burst 이하): ");
+
+      if (io_request_time <= cpu_burst)
+        break;
+
+      logger(LOG_ERROR, "I/O request time은 CPU burst(%d)보다 작거나 같아야 합니다.\n", cpu_burst);
+    }
+
+    Process *new_process = malloc(sizeof(Process));
+
+    *new_process = (Process){
+        .pid = (*pid_counter)++,
+        .arrived_at = current_time,
+
+        .cpu_burst = cpu_burst,
+        .cpu_burst_remaining = cpu_burst,
+
+        .io_burst = io_burst,
+        .io_burst_remaining = io_burst,
+        .io_request_time = io_request_time,
+        .is_in_io = false,
+
+        .started_at = -1,
+        .last_ready_enqueued_at = current_time,
+        .waiting = 0,
+    };
+
+    scheduler->enqueue(scheduler, new_process);
+  }
+}
+
 int main(void) {
   int pid_counter = 1;
   Process *running_process = NULL;
@@ -64,21 +105,29 @@ int main(void) {
 
     while (1) {
       print_time(current_time);
-      printf("무엇을 할까요? (new/continue/finish/status/history/gantt/quit): ");
+      printf("무엇을 할까요? (add/tick/finish/status/history/gantt/quit): ");
 
       if (!fgets(input, sizeof(input), stdin)) // EOF
         end_simulator(current_time);
 
       choice = tolower(input[0]);
 
-      if (strchr("ncfshgq", choice))
+      if (strchr("atfshgq", choice))
         break;
     }
 
     switch (choice) {
-    case 'q':
-      end_simulator(current_time);
-      break;
+    case 'a':
+      add_processes(scheduler, &pid_counter, current_time);
+      continue;
+
+    case 't':
+      execute_one_tick(scheduler, io_queue, &running_process, &current_time);
+      continue;
+
+    case 'f':
+      execute_until_all_done(scheduler, io_queue, &running_process, &current_time);
+      continue;
 
     case 's':
       print_process_status(running_process);
@@ -99,53 +148,10 @@ int main(void) {
       print_inline_gantt_chart();
       continue;
 
-    case 'f':
-      execute_until_all_done(scheduler, io_queue, &running_process, &current_time);
-      continue;
-
-    case 'n':
-      while (1) {
-        int cpu_burst = get_nonnegative_int("    CPU burst (1 이상, 0 입력하여 추가 완료): ");
-        if (cpu_burst == 0)
-          break;
-
-        int io_burst = get_nonnegative_int("    I/O burst (0 이상): ");
-
-        int io_request_time = -1;
-        while (io_burst > 0) {
-          io_request_time = get_nonnegative_int("    I/O request time (0 이상 CPU burst 이하): ");
-
-          if (io_request_time <= cpu_burst)
-            break;
-
-          logger(LOG_ERROR, "I/O request time은 CPU burst(%d)보다 작거나 같아야 합니다.\n",
-                 cpu_burst);
-        }
-
-        Process *new_process = malloc(sizeof(Process));
-
-        *new_process = (Process){
-            .pid = pid_counter++,
-            .arrived_at = current_time,
-
-            .cpu_burst = cpu_burst,
-            .cpu_burst_remaining = cpu_burst,
-
-            .io_burst = io_burst,
-            .io_burst_remaining = io_burst,
-            .io_request_time = io_request_time,
-            .is_in_io = false,
-
-            .started_at = -1,
-            .last_ready_enqueued_at = current_time,
-            .waiting = 0,
-        };
-
-        scheduler->enqueue(scheduler, new_process);
-      }
+    case 'q':
+      end_simulator(current_time);
+      break;
     }
-
-    execute_one_tick(scheduler, io_queue, &running_process, &current_time);
   }
 
   end_simulator(current_time);
