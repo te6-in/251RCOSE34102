@@ -65,6 +65,9 @@ static void end_simulator(int current_time) {
 
   print_stats();
 
+  scheduler->destroy(scheduler);
+  destroy_queue(io_queue);
+
   exit(0);
 }
 
