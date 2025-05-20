@@ -85,6 +85,12 @@ static int fcfs_get_left_process_count(Scheduler *scheduler) {
   return get_queue_size(state->ready_queue);
 }
 
+static void fcfs_on_initialize(Scheduler *_scheduler) {
+  (void)_scheduler;
+
+  // no-op
+}
+
 Scheduler *create_fcfs_scheduler(void) {
   FcfsState *state = calloc(1, sizeof *state); // state.dummy = 0으로 초기화
   state->ready_queue = create_queue();
@@ -97,6 +103,7 @@ Scheduler *create_fcfs_scheduler(void) {
       .pick_next = fcfs_pick_next,
       .on_tick = fcfs_on_tick,
       .should_preempt = fcfs_should_preempt,
+      .on_initialize = fcfs_on_initialize,
       .destroy = fcfs_destroy,
 
       .state = state,

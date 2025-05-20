@@ -1,15 +1,16 @@
 #include "process_queue.h"
 #include "schedulers.h"
+#include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
-
-#define RR_TIME_QUANTUM 3
 
 typedef struct {
   ProcessQueue *ready_queue;
 
   Process *last_run_process; // 틱 변화 시 직전에 수행한 프로세스와 같은지 확인하기 위해 필요.
                              // 다르면 time_quantum_left 초기화
+
+  int time_quantum;
   int time_quantum_left;
 } RrState;
 
@@ -57,7 +58,7 @@ static Process *rr_pick_next(Scheduler *scheduler) {
     return NULL;
 
   state->last_run_process = process;
-  state->time_quantum_left = RR_TIME_QUANTUM;
+  state->time_quantum_left = state->time_quantum;
 
   return process;
 }
@@ -77,7 +78,7 @@ static bool rr_should_preempt(Scheduler *scheduler, Process *running_process) {
   if (running_process != state->last_run_process) {
     // 업데이트, time_quantum_left 초기화, preemption 필요 없음
     state->last_run_process = running_process;
-    state->time_quantum_left = RR_TIME_QUANTUM;
+    state->time_quantum_left = state->time_quantum;
 
     return false;
   }
@@ -87,7 +88,7 @@ static bool rr_should_preempt(Scheduler *scheduler, Process *running_process) {
   if (state->time_quantum_left == 0 && state->ready_queue->head) {
     // 지금 NULL이지만 직후 pick_next()에서 채워짐
     state->last_run_process = NULL;
-    state->time_quantum_left = RR_TIME_QUANTUM;
+    state->time_quantum_left = state->time_quantum;
 
     return true;
   }
@@ -114,6 +115,12 @@ static int rr_get_left_process_count(Scheduler *scheduler) {
   return get_queue_size(state->ready_queue);
 }
 
+static void rr_on_initialize(Scheduler *scheduler) {
+  RrState *state = scheduler->state;
+
+  state->time_quantum = get_positive_int("\n  Time quantum: ");
+}
+
 Scheduler *create_rr_scheduler(void) {
   RrState *state = calloc(1, sizeof *state);
   state->ready_queue = create_queue();
@@ -126,6 +133,7 @@ Scheduler *create_rr_scheduler(void) {
       .pick_next = rr_pick_next,
       .on_tick = rr_on_tick,
       .should_preempt = rr_should_preempt,
+      .on_initialize = rr_on_initialize,
       .destroy = rr_destroy,
 
       .state = state,

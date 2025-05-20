@@ -86,6 +86,12 @@ static int sjf_get_left_process_count(Scheduler *scheduler) {
   return get_queue_size(state->ready_queue);
 }
 
+static void sjf_on_initialize(Scheduler *_scheduler) {
+  (void)_scheduler;
+
+  // no-op
+}
+
 Scheduler *create_sjf_scheduler(void) {
   SjfState *state = calloc(1, sizeof *state);
   state->ready_queue = create_queue();
@@ -98,6 +104,7 @@ Scheduler *create_sjf_scheduler(void) {
       .pick_next = sjf_pick_next,
       .on_tick = sjf_on_tick,
       .should_preempt = sjf_should_preempt,
+      .on_initialize = sjf_on_initialize,
       .destroy = sjf_destroy,
 
       .state = state,

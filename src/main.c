@@ -21,6 +21,7 @@ int main(void) {
   Process *running_process = NULL;
 
   logger(LOG_INFO, "%s 스케줄러를 실행할게요", scheduler->name);
+  scheduler->on_initialize(scheduler);
 
   while (1) {
     char input[16];

@@ -90,6 +90,12 @@ static int ppriority_get_left_process_count(Scheduler *scheduler) {
   return get_queue_size(state->ready_queue);
 }
 
+static void ppriority_on_initialize(Scheduler *_scheduler) {
+  (void)_scheduler;
+
+  // no-op
+}
+
 Scheduler *create_ppriority_scheduler(void) {
   PPriorityState *state = calloc(1, sizeof *state);
   state->ready_queue = create_queue();
@@ -102,6 +108,7 @@ Scheduler *create_ppriority_scheduler(void) {
       .pick_next = ppriority_pick_next,
       .on_tick = ppriority_on_tick,
       .should_preempt = ppriority_should_preempt,
+      .on_initialize = ppriority_on_initialize,
       .destroy = ppriority_destroy,
 
       .state = state,

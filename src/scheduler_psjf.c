@@ -90,6 +90,12 @@ static int psjf_get_left_process_count(Scheduler *scheduler) {
   return get_queue_size(state->ready_queue);
 }
 
+static void psjf_on_initialize(Scheduler *_scheduler) {
+  (void)_scheduler;
+
+  // no-op
+}
+
 Scheduler *create_psjf_scheduler(void) {
   PsjfState *state = calloc(1, sizeof *state);
   state->ready_queue = create_queue();
@@ -102,6 +108,7 @@ Scheduler *create_psjf_scheduler(void) {
       .pick_next = psjf_pick_next,
       .on_tick = psjf_on_tick,
       .should_preempt = psjf_should_preempt,
+      .on_initialize = psjf_on_initialize,
       .destroy = psjf_destroy,
 
       .state = state,
