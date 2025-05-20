@@ -16,14 +16,20 @@ static void tick(Scheduler *scheduler, ProcessQueue *io_queue, int *current_time
   // 2. I/O 큐에서 끝나는 프로세스가 있는지 먼저 확인
   Process *process;
 
-  if (!peek(io_queue, &process))
+  if (!peek(io_queue, &process)) {
+    scheduler->on_tick(scheduler);
+
     return;
+  }
 
   // I/O 큐에 프로세스 있는 경우 head의 remaining -1
   (process->io_burst_remaining)--;
 
-  if (process->io_burst_remaining > 0)
+  if (process->io_burst_remaining > 0) {
+    scheduler->on_tick(scheduler);
+
     return;
+  }
 
   // -1 했더니 0인 경우 I/O 큐에서 프로세스 제거 후 레디 큐 맨 뒤로 추가
   process->is_in_io = false;
