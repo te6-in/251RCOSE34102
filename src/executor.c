@@ -1,4 +1,3 @@
-
 #include "controller.h"
 #include "history.h"
 #include "logger.h"
@@ -62,6 +61,19 @@ void execute_one_tick(Scheduler *scheduler, ProcessQueue *io_queue, Process **ru
       (*running_process)->waiting += *current_time - (*running_process)->last_ready_enqueued_at;
     }
 
+    // preempt 필요한 경우
+    if (*running_process && scheduler->should_preempt(scheduler, *running_process)) {
+      print_time(*current_time);
+      printf("프로세스 %d preempt (burst %d 남음)\n", (*running_process)->pid,
+             (*running_process)->cpu_burst_remaining);
+
+      scheduler->enqueue(scheduler, *running_process);
+      (*running_process)->last_ready_enqueued_at = *current_time;
+      *running_process = NULL;
+
+      continue;
+    }
+
     // (새로) 선택된 프로세스가 I/O 요청을 해야 하는 경우
     if ((*running_process)->is_in_io == false && (*running_process)->io_burst_remaining > 0 &&
         ((*running_process)->cpu_burst - (*running_process)->cpu_burst_remaining ==
@@ -79,7 +91,7 @@ void execute_one_tick(Scheduler *scheduler, ProcessQueue *io_queue, Process **ru
       continue;
     }
 
-    // 실행 가능한 running_process
+    // 실행 가능한 running_process가 있는 경우
     break;
   }
 

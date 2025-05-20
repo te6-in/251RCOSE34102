@@ -9,6 +9,7 @@ typedef struct Scheduler {
   void (*enqueue)(struct Scheduler *, Process *);
   Process *(*pick_next)(struct Scheduler *);
   void (*on_tick)(struct Scheduler *);
+  bool (*should_preempt)(struct Scheduler *, Process *);
   void (*destroy)(struct Scheduler *);
 
   void *state;

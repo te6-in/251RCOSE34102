@@ -59,6 +59,15 @@ static void fcfs_on_tick(Scheduler *_scheduler) {
   // no-op
 }
 
+static bool fcfs_should_preempt(Scheduler *_scheduler, Process *_running_process) {
+  (void)_scheduler;
+  (void)_running_process;
+
+  // no-op
+
+  return false;
+}
+
 static void fcfs_destroy(Scheduler *scheduler) {
   free(scheduler->state);
   free(scheduler);
@@ -89,6 +98,7 @@ Scheduler *create_fcfs_scheduler(void) {
       .enqueue = fcfs_enqueue,
       .pick_next = fcfs_pick_next,
       .on_tick = fcfs_on_tick,
+      .should_preempt = fcfs_should_preempt,
       .destroy = fcfs_destroy,
 
       .state = state,

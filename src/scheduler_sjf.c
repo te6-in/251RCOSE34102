@@ -60,6 +60,15 @@ static void sjf_on_tick(Scheduler *_scheduler) {
   // no-op
 }
 
+static bool sjf_should_preempt(Scheduler *_scheduler, Process *_running_process) {
+  (void)_scheduler;
+  (void)_running_process;
+
+  // no-op
+
+  return false;
+}
+
 static void sjf_destroy(Scheduler *scheduler) {
   free(scheduler->state);
   free(scheduler);
@@ -90,6 +99,7 @@ Scheduler *create_sjf_scheduler(void) {
       .enqueue = sjf_enqueue,
       .pick_next = sjf_pick_next,
       .on_tick = sjf_on_tick,
+      .should_preempt = sjf_should_preempt,
       .destroy = sjf_destroy,
 
       .state = state,
