@@ -45,7 +45,7 @@ void end_simulator(int current_time, Scheduler *scheduler, ProcessQueue *io_queu
 }
 
 void add_process(Scheduler *scheduler, int *pid_counter, int current_time) {
-  int cpu_burst = get_nonnegative_int("    CPU burst (1 이상): ");
+  int cpu_burst = get_positive_int("    CPU burst (1 이상): ");
 
   int io_burst = get_nonnegative_int("    I/O burst (0 이상): ");
 
