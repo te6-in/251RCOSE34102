@@ -1,5 +1,5 @@
-#ifndef SCHEDULER_SJF_H
-#define SCHEDULER_SJF_H
+#ifndef SCHEDULER_PSJF_H
+#define SCHEDULER_PSJF_H
 
 #include "schedulers.h"
 
