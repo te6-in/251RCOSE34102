@@ -4,9 +4,13 @@
 #include "logger.h"
 #include "process_queue.h"
 #include "scheduler_fcfs.h"
+#include "scheduler_ppriority.h"
+#include "scheduler_priority.h"
 #include "scheduler_psjf.h"
+#include "scheduler_rr.h"
 #include "scheduler_sjf.h"
 #include "schedulers.h"
+#include "utils.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,11 +20,53 @@ int main(void) {
   int current_time = 0;
   int pid_counter = 1;
 
-  Scheduler *scheduler = create_psjf_scheduler();
+  Scheduler *scheduler = NULL;
+
+  while (1) {
+    int choice = get_positive_int("어떤 스케줄러를 사용할까요?\n"
+                                  "  1 - FCFS\n"
+                                  "  2 - SJF\n"
+                                  "  3 - Preemptive SJF\n"
+                                  "  4 - Priority\n"
+                                  "  5 - Preemptive Priority\n"
+                                  "  6 - RR\n"
+                                  "입력: ");
+
+    if (choice > 6) {
+      logger(LOG_ERROR, "잘못된 입력입니다. 1~6 사이의 숫자를 입력하세요.\n");
+      continue;
+    }
+
+    switch (choice) {
+    case 1:
+      scheduler = create_fcfs_scheduler();
+      break;
+    case 2:
+      scheduler = create_sjf_scheduler();
+      break;
+    case 3:
+      scheduler = create_psjf_scheduler();
+      break;
+    case 4:
+      scheduler = create_priority_scheduler();
+      break;
+    case 5:
+      scheduler = create_ppriority_scheduler();
+      break;
+    case 6:
+      scheduler = create_rr_scheduler();
+      break;
+    }
+
+    if (scheduler)
+      break;
+  }
+
   ProcessQueue *io_queue = create_queue();
   Process *running_process = NULL;
 
-  logger(LOG_INFO, "%s 스케줄러를 실행할게요", scheduler->name);
+  printf("\n");
+  logger(LOG_INFO, "%s 스케줄러를 실행할게요\n", scheduler->name);
   scheduler->on_initialize(scheduler);
 
   while (1) {
