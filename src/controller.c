@@ -43,43 +43,44 @@ void end_simulator(int current_time, Scheduler *scheduler, ProcessQueue *io_queu
   exit(0);
 }
 
-void add_processes(Scheduler *scheduler, int *pid_counter, int current_time) {
-  while (1) {
-    int cpu_burst = get_nonnegative_int("    CPU burst (1 이상, 0 입력하여 추가 완료): ");
-    if (cpu_burst == 0)
-      return;
+void add_process(Scheduler *scheduler, int *pid_counter, int current_time) {
+  int cpu_burst = get_nonnegative_int("    CPU burst (1 이상): ");
 
-    int io_burst = get_nonnegative_int("    I/O burst (0 이상): ");
+  int io_burst = get_nonnegative_int("    I/O burst (0 이상): ");
 
-    int io_request_time = -1;
-    while (io_burst > 0) {
-      io_request_time = get_nonnegative_int("    I/O request time (0 이상 CPU burst 이하): ");
+  int io_request_time = -1;
+  while (io_burst > 0) {
+    io_request_time = get_nonnegative_int("    I/O request time (0 이상 CPU burst 이하): ");
 
-      if (io_request_time <= cpu_burst)
-        break;
+    if (io_request_time <= cpu_burst)
+      break;
 
-      logger(LOG_ERROR, "I/O request time은 CPU burst(%d)보다 작거나 같아야 합니다.\n", cpu_burst);
-    }
-
-    Process *new_process = malloc(sizeof(Process));
-
-    *new_process = (Process){
-        .pid = (*pid_counter)++,
-        .arrived_at = current_time,
-
-        .cpu_burst = cpu_burst,
-        .cpu_burst_remaining = cpu_burst,
-
-        .io_burst = io_burst,
-        .io_burst_remaining = io_burst,
-        .io_request_time = io_request_time,
-        .is_in_io = false,
-
-        .started_at = -1,
-        .last_ready_enqueued_at = current_time,
-        .waiting = 0,
-    };
-
-    scheduler->enqueue(scheduler, new_process);
+    logger(LOG_ERROR, "I/O request time은 CPU burst(%d)보다 작거나 같아야 합니다.\n", cpu_burst);
   }
+
+  int priority = *scheduler->name == "Priority"
+                     ? get_positive_int("    Priority (1 이상, 클수록 높은 priority): ")
+                     : -1;
+
+  Process *new_process = malloc(sizeof(Process));
+
+  *new_process = (Process){
+      .pid = (*pid_counter)++,
+      .arrived_at = current_time,
+      .priority = priority,
+
+      .cpu_burst = cpu_burst,
+      .cpu_burst_remaining = cpu_burst,
+
+      .io_burst = io_burst,
+      .io_burst_remaining = io_burst,
+      .io_request_time = io_request_time,
+      .is_in_io = false,
+
+      .started_at = -1,
+      .last_ready_enqueued_at = current_time,
+      .waiting = 0,
+  };
+
+  scheduler->enqueue(scheduler, new_process);
 }

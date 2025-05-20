@@ -7,7 +7,7 @@ typedef struct {
   // meta
   int pid;
   int arrived_at;
-  // int priority;
+  int priority;
 
   // cpu
   int cpu_burst, cpu_burst_remaining;

@@ -2,8 +2,8 @@
 
 const Process NULL_PROCESS = {
     .pid = -1,
-
     .arrived_at = -1,
+    .priority = -1,
 
     .cpu_burst = -1,
     .cpu_burst_remaining = -1,

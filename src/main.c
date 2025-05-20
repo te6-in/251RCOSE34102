@@ -4,6 +4,8 @@
 #include "logger.h"
 #include "process_queue.h"
 #include "scheduler_fcfs.h"
+#include "scheduler_psjf.h"
+#include "scheduler_sjf.h"
 #include "schedulers.h"
 #include <ctype.h>
 #include <stdio.h>
@@ -14,7 +16,7 @@ int main(void) {
   int current_time = 0;
   int pid_counter = 1;
 
-  Scheduler *scheduler = create_fcfs_scheduler();
+  Scheduler *scheduler = create_psjf_scheduler();
   ProcessQueue *io_queue = create_queue();
   Process *running_process = NULL;
 
@@ -39,7 +41,7 @@ int main(void) {
 
     switch (choice) {
     case 'a':
-      add_processes(scheduler, &pid_counter, current_time);
+      add_process(scheduler, &pid_counter, current_time);
       continue;
 
     case 't':
