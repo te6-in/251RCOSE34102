@@ -28,7 +28,9 @@ int main(void) {
 
     while (1) {
       print_time(current_time);
-      printf("무엇을 할까요? (add/tick/finish/status/history/gantt/quit): ");
+      printf("무엇을 할까요? "
+             "(\033[4ma\033[0mdd/\033[4mt\033[0mick/\033[4mf\033[0minish/\033[4ms\033[0mtatus/"
+             "\033[4mh\033[0mistory/\033[4mg\033[0mantt/\033[4mq\033[0muit): ");
 
       if (!fgets(input, sizeof(input), stdin)) // EOF
         end_simulator(current_time, scheduler, io_queue);
