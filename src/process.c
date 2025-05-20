@@ -17,3 +17,11 @@ const Process NULL_PROCESS = {
     .last_ready_enqueued_at = -1,
     .waiting = -1,
 };
+
+bool has_shorter_cpu_burst_remaining(Process *a, Process *b) {
+  if (a->cpu_burst_remaining != b->cpu_burst_remaining)
+    return a->cpu_burst_remaining < b->cpu_burst_remaining;
+
+  // 같은 경우 arrived_at 참조
+  return a->arrived_at < b->arrived_at;
+}

@@ -24,4 +24,6 @@ typedef struct {
 
 extern const Process NULL_PROCESS;
 
+bool has_shorter_cpu_burst_remaining(Process *a, Process *b);
+
 #endif

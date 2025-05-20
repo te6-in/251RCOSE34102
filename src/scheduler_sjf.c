@@ -1,3 +1,4 @@
+#include "process.h"
 #include "process_queue.h"
 #include "schedulers.h"
 #include <stdio.h>
@@ -6,14 +7,6 @@
 typedef struct {
   ProcessQueue *ready_queue;
 } SjfState;
-
-static int has_shorter_cpu_burst(Process *a, Process *b) {
-  if (a->cpu_burst_remaining != b->cpu_burst_remaining)
-    return a->cpu_burst_remaining < b->cpu_burst_remaining;
-
-  // 같은 경우 arrived_at 참조
-  return a->arrived_at < b->arrived_at;
-}
 
 static void sjf_enqueue(Scheduler *scheduler, Process *process) {
   SjfState *state = scheduler->state;
@@ -26,7 +19,7 @@ static void sjf_enqueue(Scheduler *scheduler, Process *process) {
 
   // 큐가 비어있거나, 새로운 프로세스의 remaining burst가 맨 앞 프로세스보다 빠른 경우
   // 맨 앞에 넣기만 하면 됨
-  if (!queue->head || has_shorter_cpu_burst(process, queue->head->process)) {
+  if (!queue->head || has_shorter_cpu_burst_remaining(process, queue->head->process)) {
     new_node->next = queue->head;
     queue->head = new_node;
 
@@ -37,7 +30,7 @@ static void sjf_enqueue(Scheduler *scheduler, Process *process) {
   }
 
   ProcessNode *current = queue->head;
-  while (current->next && !has_shorter_cpu_burst(process, current->next->process)) {
+  while (current->next && !has_shorter_cpu_burst_remaining(process, current->next->process)) {
     current = current->next;
   }
 
