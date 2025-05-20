@@ -9,6 +9,7 @@
 #include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 void print_process_status(Process *process) {
   if (!process) {
@@ -58,7 +59,7 @@ void add_process(Scheduler *scheduler, int *pid_counter, int current_time) {
     logger(LOG_ERROR, "I/O request time은 CPU burst(%d)보다 작거나 같아야 합니다.\n", cpu_burst);
   }
 
-  int priority = *scheduler->name == "Priority"
+  int priority = strcmp(scheduler->name, "Priority") == 0
                      ? get_positive_int("    Priority (1 이상, 클수록 높은 priority): ")
                      : -1;
 

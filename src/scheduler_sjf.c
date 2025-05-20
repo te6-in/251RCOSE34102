@@ -64,8 +64,6 @@ static bool sjf_should_preempt(Scheduler *_scheduler, Process *_running_process)
   (void)_scheduler;
   (void)_running_process;
 
-  // no-op
-
   return false;
 }
 

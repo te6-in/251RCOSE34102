@@ -26,4 +26,6 @@ extern const Process NULL_PROCESS;
 
 bool has_shorter_cpu_burst_remaining(Process *a, Process *b);
 
+bool has_higher_priority(Process *a, Process *b);
+
 #endif

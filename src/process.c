@@ -22,6 +22,14 @@ bool has_shorter_cpu_burst_remaining(Process *a, Process *b) {
   if (a->cpu_burst_remaining != b->cpu_burst_remaining)
     return a->cpu_burst_remaining < b->cpu_burst_remaining;
 
-  // 같은 경우 arrived_at 참조
+  // 같은 경우 FCFS
+  return a->arrived_at < b->arrived_at;
+}
+
+bool has_higher_priority(Process *a, Process *b) {
+  if (a->priority != b->priority)
+    return a->priority > b->priority;
+
+  // 같은 경우 FCFS
   return a->arrived_at < b->arrived_at;
 }
