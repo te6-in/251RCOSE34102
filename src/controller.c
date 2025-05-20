@@ -59,7 +59,7 @@ void add_process(Scheduler *scheduler, int *pid_counter, int current_time) {
     logger(LOG_ERROR, "I/O request time은 CPU burst(%d)보다 작거나 같아야 합니다.\n", cpu_burst);
   }
 
-  int priority = strcmp(scheduler->name, "Priority") == 0
+  int priority = strstr(scheduler->name, "Priority") != NULL
                      ? get_positive_int("    Priority (1 이상, 클수록 높은 priority): ")
                      : -1;
 

@@ -47,7 +47,7 @@ static Process *priority_pick_next(Scheduler *scheduler) {
   Process *process = NULL;
 
   // enqueue에서 priority 순으로 정렬해서 넣어줬으므로
-  // 벌크로 등록되더라도 priority가 가장 작은 프로세스가 맨 앞에 위치
+  // 벌크로 등록되더라도 priority가 가장 큰 프로세스가 맨 앞에 위치
   if (!dequeue(state->ready_queue, &process))
     return NULL;
 

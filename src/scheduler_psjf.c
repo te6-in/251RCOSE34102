@@ -44,14 +44,15 @@ static void psjf_enqueue(Scheduler *scheduler, Process *process) {
 
 static Process *psjf_pick_next(Scheduler *scheduler) {
   PsjfState *state = scheduler->state;
-  Process *proc = NULL;
+
+  Process *process = NULL;
 
   // enqueue에서 remaining burst 순으로 정렬해서 넣어줬으므로
   // 벌크로 등록되더라도 remaining burst가 가장 작은 프로세스가 맨 앞에 위치
-  if (!dequeue(state->ready_queue, &proc))
+  if (!dequeue(state->ready_queue, &process))
     return NULL;
 
-  return proc;
+  return process;
 }
 
 static void psjf_on_tick(Scheduler *_scheduler) {
@@ -95,7 +96,7 @@ Scheduler *create_psjf_scheduler(void) {
 
   Scheduler *scheduler = malloc(sizeof *scheduler);
   *scheduler = (Scheduler){
-      .name = "PSJF",
+      .name = "Preemptive SJF",
 
       .enqueue = psjf_enqueue,
       .pick_next = psjf_pick_next,
