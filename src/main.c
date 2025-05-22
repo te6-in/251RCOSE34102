@@ -19,13 +19,43 @@
 
 #define TSV_FILE_PATH "data/processes.tsv"
 
-int main(void) {
+int main(int argc, char *argv[]) {
   int current_time = 0;
   int pid_counter = 1;
 
   Scheduler *scheduler = NULL;
 
-  while (1) {
+  const char *scheduler_flag = NULL;
+  int non_interactive = 0;
+
+  for (int i = 1; i < argc; i++) {
+    if (strncmp(argv[i], "--scheduler=", 12) == 0) {
+      scheduler_flag = argv[i] + 12; // 문자열 시작 주소로 설정하여 trim
+    } else if (strcmp(argv[i], "--non-interactive") == 0) {
+      non_interactive = 1;
+    }
+  }
+
+  if (scheduler_flag) {
+    if (strcmp(scheduler_flag, "fcfs") == 0)
+      scheduler = create_fcfs_scheduler();
+    else if (strcmp(scheduler_flag, "sjf") == 0)
+      scheduler = create_sjf_scheduler();
+    else if (strcmp(scheduler_flag, "psjf") == 0)
+      scheduler = create_psjf_scheduler();
+    else if (strcmp(scheduler_flag, "priority") == 0)
+      scheduler = create_priority_scheduler();
+    else if (strcmp(scheduler_flag, "ppriority") == 0)
+      scheduler = create_ppriority_scheduler();
+    else if (strcmp(scheduler_flag, "rr") == 0)
+      scheduler = create_rr_scheduler();
+    else {
+      logger(LOG_ERROR, "scheduler flag를 확인해주세요: %s\n", scheduler_flag);
+      exit(1);
+    }
+  }
+
+  while (!scheduler) {
     int choice = get_positive_int("어떤 스케줄러를 사용할까요?\n"
                                   "  1 - FCFS\n"
                                   "  2 - SJF\n"
@@ -60,9 +90,6 @@ int main(void) {
       scheduler = create_rr_scheduler();
       break;
     }
-
-    if (scheduler)
-      break;
   }
 
   ProcessQueue *io_queue = create_queue();
@@ -74,6 +101,13 @@ int main(void) {
 
   int pending_process_count = 0;
   Process *pending_processes = load_processes_from_tsv(TSV_FILE_PATH, &pending_process_count);
+
+  if (non_interactive) {
+    execute_until_all_done(scheduler, io_queue, &running_process, &current_time, pending_processes,
+                           pending_process_count);
+
+    end_simulator(current_time, scheduler, io_queue);
+  }
 
   while (1) {
     char input[16];
