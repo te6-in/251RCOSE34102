@@ -3,6 +3,6 @@
 
 #include "schedulers.h"
 
-Scheduler *create_rr_scheduler(void);
+Scheduler *create_rr_scheduler(int time_quantum);
 
 #endif

@@ -119,12 +119,19 @@ static int rr_get_left_process_count(Scheduler *scheduler) {
 static void rr_on_initialize(Scheduler *scheduler) {
   RrState *state = scheduler->state;
 
+  if (state->time_quantum > 0)
+    return;
+
   state->time_quantum = get_positive_int("\n  Time quantum: ");
 }
 
-Scheduler *create_rr_scheduler(void) {
+Scheduler *create_rr_scheduler(int time_quantum) {
   RrState *state = calloc(1, sizeof *state);
   state->ready_queue = create_queue();
+
+  if (time_quantum > 0) {
+    state->time_quantum = time_quantum;
+  }
 
   Scheduler *scheduler = malloc(sizeof *scheduler);
   *scheduler = (Scheduler){

@@ -1,32 +1,62 @@
 import { execSync } from 'child_process';
 import { groupBy, mapValues, meanBy } from 'es-toolkit';
 
-const SCHEDULERS = [
-  "fcfs",
-  "sjf",
-  "psjf",
-  "priority",
-  "ppriority",
-  "rr",
-];
+const OPTIONS = [
+  {
+    scheduler: 'fcfs',
+  },
+  {
+    scheduler: 'sjf',
+  },
+  {
+    scheduler: 'psjf',
+  },
+  {
+    scheduler: 'priority',
+  },
+  {
+    scheduler: 'ppriority',
+  },
+  {
+    scheduler: 'rr',
+    "rr-time-quantum": 10,
+  },
+  {
+    scheduler: 'rr',
+    "rr-time-quantum": 20,
+  },
+  {
+    scheduler: 'rr',
+    "rr-time-quantum": 30,
+  },
+  {
+    scheduler: 'rr',
+    "rr-time-quantum": 40,
+  },
+  {
+    scheduler: 'rr',
+    "rr-time-quantum": 50,
+  },
+]
 
 function getResult(fileName) {
   const result = [];
 
-  for (const scheduler of SCHEDULERS) {
-    console.log(`\n${scheduler}:`);
+  for (const { scheduler, ...rest } of OPTIONS) {
+    // console.log(`\n${scheduler}:`);
 
     try {
-      const output = execSync(`../../bin/sim --tsv=${fileName} --scheduler=${scheduler} --non-interactive`, {
+      const output = execSync(`../../bin/sim --tsv=${fileName} --scheduler=${scheduler} --non-interactive ${Object.entries(rest).map(([key, value]) => `--${key}=${value}`).join(' ')
+        }`, {
         encoding: 'utf-8'
       });
 
       const statLines = output.split('\n').filter(l => l.includes('[평균 '));
 
-      console.log(statLines.join('\n'));
+      // console.log(statLines.join('\n'));
 
       result.push({
-        scheduler,
+        scheduler: `${scheduler}${Object.entries(rest).length > 0 ? ` (${Object.entries(rest).map(([key, value]) => `${key}=${value}`).join(', ')})` : ''}`,
         turnaround: parseFloat(statLines[0].split(']')[1].trim()),
         waiting: parseFloat(statLines[1].split(']')[1].trim())
       });

@@ -25,10 +25,18 @@ int main(int argc, char *argv[]) {
   char *scheduler_flag = NULL;
   char *tsv_flag = "data/processes.tsv"; // default
   int non_interactive_flag = 0;
+  int rr_time_quantum_flag = 0;
 
   for (int i = 1; i < argc; i++) {
     if (strncmp(argv[i], "--scheduler=", 12) == 0) {
       scheduler_flag = argv[i] + 12; // 문자열 시작 주소로 설정하여 trim
+    } else if (strncmp(argv[i], "--rr-time-quantum=", 18) == 0) {
+      rr_time_quantum_flag = atoi(argv[i] + 18); // int로 변환
+
+      if (rr_time_quantum_flag <= 0) {
+        logger(LOG_ERROR, "--rr-time-quantum은 0보다 커야 합니다.\n");
+        exit(1);
+      }
     } else if (strncmp(argv[i], "--tsv=", 6) == 0) {
       tsv_flag = argv[i] + 6;
     } else if (strcmp(argv[i], "--non-interactive") == 0) {
@@ -47,9 +55,9 @@ int main(int argc, char *argv[]) {
       scheduler = create_priority_scheduler();
     else if (strcmp(scheduler_flag, "ppriority") == 0)
       scheduler = create_ppriority_scheduler();
-    else if (strcmp(scheduler_flag, "rr") == 0)
-      scheduler = create_rr_scheduler();
-    else {
+    else if (strcmp(scheduler_flag, "rr") == 0) {
+      scheduler = create_rr_scheduler(rr_time_quantum_flag);
+    } else {
       logger(LOG_ERROR, "scheduler flag를 확인해주세요: %s\n", scheduler_flag);
       exit(1);
     }
@@ -87,7 +95,7 @@ int main(int argc, char *argv[]) {
       scheduler = create_ppriority_scheduler();
       break;
     case 6:
-      scheduler = create_rr_scheduler();
+      scheduler = create_rr_scheduler(rr_time_quantum_flag);
       break;
     }
   }
