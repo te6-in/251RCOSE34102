@@ -2,7 +2,7 @@
 #include "process.h"
 #include <stdio.h>
 
-#define MAX_HISTORY 1000
+#define MAX_HISTORY 8192
 
 static Process history[MAX_HISTORY];
 static int history_count = 0;
