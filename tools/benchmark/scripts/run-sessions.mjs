@@ -71,7 +71,7 @@ function getResult(fileName) {
 
 const results = [];
 
-for (let i = 0; i < 30; i++) {
+for (let i = 0; i < 100; i++) {
   const fileName = `../../data/__generated__/processes_${i}.tsv`;
 
   console.log(`\n\n${fileName}:`);
