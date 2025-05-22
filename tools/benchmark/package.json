@@ -3,7 +3,7 @@
   "packageManager": "yarn@4.6.0",
   "scripts": {
     "generate": "node scripts/generate-tsv.mjs",
-    "start": "node scripts/run-sessions.mjs"
+    "benchmark": "node scripts/run-sessions.mjs"
   },
   "dependencies": {
     "es-toolkit": "^1.38.0"
