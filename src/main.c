@@ -17,7 +17,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TSV_FILE_PATH "data/processes.tsv"
 
 int main(int argc, char *argv[]) {
   int current_time = 0;
@@ -25,14 +24,17 @@ int main(int argc, char *argv[]) {
 
   Scheduler *scheduler = NULL;
 
-  const char *scheduler_flag = NULL;
-  int non_interactive = 0;
+  char *scheduler_flag = NULL;
+  char *tsv_flag = "data/processes.tsv"; // default
+  int non_interactive_flag = 0;
 
   for (int i = 1; i < argc; i++) {
     if (strncmp(argv[i], "--scheduler=", 12) == 0) {
       scheduler_flag = argv[i] + 12; // 문자열 시작 주소로 설정하여 trim
+    } else if (strncmp(argv[i], "--tsv=", 6) == 0) {
+      tsv_flag = argv[i] + 6;
     } else if (strcmp(argv[i], "--non-interactive") == 0) {
-      non_interactive = 1;
+      non_interactive_flag = 1;
     }
   }
 
@@ -100,9 +102,9 @@ int main(int argc, char *argv[]) {
   scheduler->on_initialize(scheduler);
 
   int pending_process_count = 0;
-  Process *pending_processes = load_processes_from_tsv(TSV_FILE_PATH, &pending_process_count);
+  Process *pending_processes = load_processes_from_tsv(tsv_flag, &pending_process_count);
 
-  if (non_interactive) {
+  if (non_interactive_flag) {
     execute_until_all_done(scheduler, io_queue, &running_process, &current_time, pending_processes,
                            pending_process_count);
 
