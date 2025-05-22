@@ -72,7 +72,8 @@ int main(void) {
   logger(LOG_INFO, "%s 스케줄러를 실행할게요\n", scheduler->name);
   scheduler->on_initialize(scheduler);
 
-  add_processes_from_tsv(scheduler, TSV_FILE_PATH);
+  int pending_process_count = 0;
+  Process *pending_processes = load_processes_from_tsv(TSV_FILE_PATH, &pending_process_count);
 
   while (1) {
     char input[16];
@@ -99,11 +100,13 @@ int main(void) {
       continue;
 
     case 't':
-      execute_one_tick(scheduler, io_queue, &running_process, &current_time);
+      execute_one_tick(scheduler, io_queue, &running_process, &current_time, pending_processes,
+                       pending_process_count);
       continue;
 
     case 'f':
-      execute_until_all_done(scheduler, io_queue, &running_process, &current_time);
+      execute_until_all_done(scheduler, io_queue, &running_process, &current_time,
+                             pending_processes, pending_process_count);
       continue;
 
     case 's':

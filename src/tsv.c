@@ -1,19 +1,21 @@
 #include "logger.h"
 #include "process.h"
-#include "schedulers.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define MAX_LINE_LEN 256
+#define MAX_PROCESSES 1024
 
-void add_processes_from_tsv(Scheduler *scheduler, const char *filename) {
+Process *load_processes_from_tsv(const char *filename, int *process_count) {
   FILE *file = fopen(filename, "r");
   if (!file) {
     logger(LOG_INFO, "%s 파일이 없거나 열 수 없어서 미리 등록하지 않았어요.", filename);
 
-    return;
+    return NULL;
   }
+
+  Process *processes = malloc(sizeof(Process) * MAX_PROCESSES);
 
   int loaded = 0;
 
@@ -28,32 +30,29 @@ void add_processes_from_tsv(Scheduler *scheduler, const char *filename) {
     int scanned = sscanf(line, "%d\t%d\t%d\t%d\t%d\t%d", &temp.pid, &temp.arrived_at,
                          &temp.priority, &temp.cpu_burst, &temp.io_burst, &temp.io_request_time);
 
-    if (scanned != 6) // invalid
-      continue;
-
-    if (temp.arrived_at < 0 || temp.pid < 0 || temp.cpu_burst <= 0 || temp.io_burst < 0 ||
-        temp.io_request_time < 0 || temp.io_request_time > temp.cpu_burst || temp.priority <= 0) {
+    if (scanned != 6 || temp.arrived_at < 0 || temp.pid < 0 || temp.cpu_burst <= 0 ||
+        temp.io_burst < 0 || temp.io_request_time < 0 || temp.io_request_time > temp.cpu_burst ||
+        temp.priority <= 0) {
       logger(LOG_ERROR, "이 프로세스는 불러올 수 없어요: %s", line);
 
       continue;
     }
 
-    Process *process = malloc(sizeof(Process));
+    temp.cpu_burst_remaining = temp.cpu_burst;
+    temp.io_burst_remaining = temp.io_burst;
+    temp.is_in_io = false;
+    temp.started_at = -1;
+    temp.last_ready_enqueued_at = -1;
+    temp.waiting = 0;
 
-    *process = temp;
-    process->cpu_burst_remaining = process->cpu_burst;
-    process->io_burst_remaining = process->io_burst;
-    process->is_in_io = false;
-    process->started_at = -1;
-    process->last_ready_enqueued_at = -1;
-    process->waiting = 0;
-
-    scheduler->enqueue(scheduler, process);
-
-    loaded++;
+    processes[loaded++] = temp;
   }
 
-  logger(LOG_INFO, "%s 파일에서 %d개의 프로세스를 불러왔어요.", filename, loaded);
+  logger(LOG_INFO, "%s 파일에서 %d개의 프로세스를 불러와 준비했어요.", filename, loaded);
 
   fclose(file);
+
+  *process_count = loaded;
+
+  return processes;
 }

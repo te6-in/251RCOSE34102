@@ -6,8 +6,18 @@
 #include "schedulers.h"
 #include "stats.h"
 #include "utils.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+static bool has_left_pending_process(Process *pending_processes, int pending_process_count) {
+  for (int i = 0; i < pending_process_count; i++) {
+    if (pending_processes[i].arrived_at != -1) {
+      return true;
+    }
+  }
+  return false;
+}
 
 static void tick(Scheduler *scheduler, ProcessQueue *io_queue, int *current_time) {
   // 1. 타이머 증가
@@ -45,7 +55,20 @@ static void tick(Scheduler *scheduler, ProcessQueue *io_queue, int *current_time
 }
 
 void execute_one_tick(Scheduler *scheduler, ProcessQueue *io_queue, Process **running_process,
-                      int *current_time) {
+                      int *current_time, Process *pending_processes, int pending_process_count) {
+  for (int i = 0; i < pending_process_count; i++) {
+    if (pending_processes[i].arrived_at == *current_time) {
+      scheduler->enqueue(scheduler, &pending_processes[i]);
+      pending_processes[i].last_ready_enqueued_at = *current_time;
+
+      pending_processes[i].arrived_at = -1; // mark as done
+
+      print_time(*current_time);
+      printf("TSV 파일에서 불러온 프로세스 %d를 스케줄러에게 전달했어요.\n",
+             pending_processes[i].pid);
+    }
+  }
+
   // running_process 찾고, 즉시 I/O 요청을 해야 하면 I/O 큐에 넣고 다시 고르기
   while (1) {
     // 없으면 꺼냄
@@ -129,22 +152,23 @@ void execute_one_tick(Scheduler *scheduler, ProcessQueue *io_queue, Process **ru
 
     add_to_stats(turnaround, (*running_process)->waiting);
 
-    free(*running_process);
     *running_process = NULL;
   }
 }
 
 void execute_until_all_done(Scheduler *scheduler, ProcessQueue *io_queue, Process **running_process,
-                            int *current_time) {
+                            int *current_time, Process *pending_processes,
+                            int pending_process_count) {
   while (1) {
     if (scheduler->get_left_process_count(scheduler) == 0 && is_empty(io_queue) &&
-        !*running_process) {
+        !has_left_pending_process(pending_processes, pending_process_count) && !*running_process) {
       logger(LOG_INFO,
              "모든 프로세스의 스케줄링과 I/O가 완료된 상태까지 틱이 실행된 상태입니다.\n");
 
       break;
     }
 
-    execute_one_tick(scheduler, io_queue, running_process, current_time);
+    execute_one_tick(scheduler, io_queue, running_process, current_time, pending_processes,
+                     pending_process_count);
   }
 }

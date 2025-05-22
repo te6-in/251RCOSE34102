@@ -1,8 +1,8 @@
 #ifndef TSV_H
 #define TSV_H
 
-#include "schedulers.h"
+#include "process.h"
 
-void add_processes_from_tsv(Scheduler *scheduler, const char *filename);
+Process *load_processes_from_tsv(const char *filename, int *process_count);
 
 #endif
