@@ -5,5 +5,8 @@ bin/
 obj/
 *.o
 
+# generated files
+data/__generated__/
+
 # macOS
 .DS_Store
