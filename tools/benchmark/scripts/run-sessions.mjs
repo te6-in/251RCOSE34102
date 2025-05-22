@@ -83,8 +83,8 @@ const byScheduler = groupBy(results.flat(), result => result.scheduler);
 
 console.dir(
   mapValues(byScheduler, (group) => ({
-    turnaround: meanBy(group, g => g.turnaround).toFixed(2),
-    waiting: meanBy(group, g => g.waiting).toFixed(2),
+    turnaround: Math.round(meanBy(group, g => g.turnaround) * 100) / 100,
+    waiting: Math.round(meanBy(group, g => g.waiting) * 100) / 100,
   }))
   , { depth: Infinity }
 );
