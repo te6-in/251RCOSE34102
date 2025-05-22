@@ -35,7 +35,7 @@ Process *load_processes_from_tsv(const char *filename, int *process_count) {
         temp.priority <= 0) {
       logger(LOG_ERROR, "이 프로세스는 불러올 수 없어요: %s", line);
 
-      continue;
+      exit(1);
     }
 
     temp.cpu_burst_remaining = temp.cpu_burst;
