@@ -66,7 +66,8 @@ static Process *rr_pick_next(Scheduler *scheduler) {
 static void rr_on_tick(Scheduler *scheduler) {
   RrState *state = scheduler->state;
 
-  if (state->last_run_process) {
+  if (state->last_run_process && state->last_run_process->is_in_io == false &&
+      state->time_quantum_left > 0) {
     state->time_quantum_left--;
   }
 }
