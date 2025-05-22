@@ -1,4 +1,5 @@
 import { execSync } from 'child_process';
+import { groupBy, mapValues, meanBy } from 'es-toolkit';
 
 const SCHEDULERS = [
   "fcfs",
@@ -48,4 +49,12 @@ for (let i = 0; i < 30; i++) {
   results.push(getResult(fileName));
 }
 
-console.dir(results, { depth: Infinity });
+const byScheduler = groupBy(results.flat(), result => result.scheduler);
+
+console.dir(
+  mapValues(byScheduler, (group) => ({
+    turnaround: meanBy(group, g => g.turnaround).toFixed(2),
+    waiting: meanBy(group, g => g.waiting).toFixed(2),
+  }))
+  , { depth: Infinity }
+);

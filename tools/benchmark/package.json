@@ -1,4 +1,10 @@
 {
-  "name": "compare-schedulers",
-  "packageManager": "yarn@4.6.0"
+  "name": "benchmark",
+  "packageManager": "yarn@4.6.0",
+  "scripts": {
+    "start": "node scripts/run-sessions.mjs"
+  },
+  "dependencies": {
+    "es-toolkit": "^1.38.0"
+  }
 }
