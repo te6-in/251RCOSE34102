@@ -1,3 +1,4 @@
 # pid arrived_at  priority  cpu_burst io_burst  io_request_time
-10001 222 3 333 3 2
-10003 333 3 222 3 0
+10001 0 3 10 3 2
+10002 5 2 25 3 0
+10003 10 5 15 4 1

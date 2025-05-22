@@ -10,7 +10,7 @@
 Process *load_processes_from_tsv(const char *filename, int *process_count) {
   FILE *file = fopen(filename, "r");
   if (!file) {
-    logger(LOG_INFO, "%s 파일이 없거나 열 수 없어서 미리 등록하지 않았어요.", filename);
+    logger(LOG_INFO, "%s 파일이 없거나 열 수 없어서 프로세스를 미리 등록하지 않았어요.", filename);
 
     return NULL;
   }
