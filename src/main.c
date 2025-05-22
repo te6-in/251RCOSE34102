@@ -10,11 +10,14 @@
 #include "scheduler_rr.h"
 #include "scheduler_sjf.h"
 #include "schedulers.h"
+#include "tsv.h"
 #include "utils.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define TSV_FILE_PATH "data/processes.tsv"
 
 int main(void) {
   int current_time = 0;
@@ -68,6 +71,8 @@ int main(void) {
   printf("\n");
   logger(LOG_INFO, "%s 스케줄러를 실행할게요\n", scheduler->name);
   scheduler->on_initialize(scheduler);
+
+  add_processes_from_tsv(scheduler, TSV_FILE_PATH);
 
   while (1) {
     char input[16];
