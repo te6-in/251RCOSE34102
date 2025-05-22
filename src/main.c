@@ -17,10 +17,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 int main(int argc, char *argv[]) {
   int current_time = 0;
-  int pid_counter = 1;
 
   Scheduler *scheduler = NULL;
 
@@ -110,6 +108,14 @@ int main(int argc, char *argv[]) {
 
     end_simulator(current_time, scheduler, io_queue);
   }
+
+  int pid_counter = 0;
+  for (int i = 0; i < pending_process_count; i++) {
+    if (pending_processes[i].pid > pid_counter) {
+      pid_counter = pending_processes[i].pid;
+    }
+  }
+  pid_counter++;
 
   while (1) {
     char input[16];

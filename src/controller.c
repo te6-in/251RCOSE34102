@@ -18,14 +18,12 @@ void print_process_status(Process *process) {
     return;
   }
 
-  // TODO: usage 필요
   if (process->is_in_io) {
     printf("    [I/O 중] P%d (%d 남음)\n", process->pid, process->io_burst_remaining);
 
     return;
   }
 
-  // TODO: usage 필요
   if (process->cpu_burst_remaining > 0) {
     printf("    [실행 중] P%d (%d 남음)\n", process->pid, process->cpu_burst_remaining);
 
@@ -84,4 +82,6 @@ void add_process(Scheduler *scheduler, int *pid_counter, int current_time) {
   };
 
   scheduler->enqueue(scheduler, new_process);
+
+  logger(LOG_INFO, "프로세스 %d 추가했어요.\n", new_process->pid);
 }
