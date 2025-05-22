@@ -36,7 +36,7 @@ function generateTsv({ fileCount, processCount }) {
     const data = generateProcesses(processCount);
 
     fs.writeFileSync(fileName, data);
-    console.log(`Generated ${fileName}`);
+    console.log(`${fileName} 생성 완료`);
   }
 }
 

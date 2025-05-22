@@ -74,7 +74,7 @@ const results = [];
 for (let i = 0; i < 100; i++) {
   const fileName = `../../data/__generated__/processes_${i}.tsv`;
 
-  console.log(`\n\n${fileName}:`);
+  console.log(`${fileName} 결과 대기 중`);
 
   results.push(getResult(fileName));
 }
